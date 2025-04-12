@@ -1,0 +1,23 @@
+# FastAPI
+fastapi==0.110.0
+uvicorn==0.29.0
+python-multipart==0.0.9
+
+# Database
+sqlalchemy==2.0.28
+pymysql==1.1.0
+cryptography==42.0.5  # Required for pymysql
+
+# Authentication
+python-jose==3.3.0
+passlib==1.7.4
+bcrypt==4.1.2
+python-dotenv==1.0.1
+pydantic-settings==2.2.1
+email-validator==2.1.1
+
+# CORS
+starlette==0.36.3
+
+# For migrations (optional)
+alembic==1.13.1

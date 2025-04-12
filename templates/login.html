@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Restaurant Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .login-container {
+            margin-top: 100px;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .card-header {
+            background-color: #fff;
+            border-bottom: none;
+            text-align: center;
+            padding-top: 30px;
+            padding-bottom: 20px;
+        }
+        .logo {
+            max-width: 80px;
+            margin-bottom: 15px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            padding: 10px;
+        }
+        .btn-primary:hover {
+            background-color: #0069d9;
+            border-color: #0062cc;
+        }
+        .input-group-text {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container login-container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h2 class="text-center">Restaurant Management</h2>
+                        <p class="text-muted">Sign in to access your dashboard</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Thay đổi form để sử dụng JavaScript thay vì submit trực tiếp -->
+                        <form id="login-form">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    <input type="text" class="form-control" id="username" name="username" 
+                                        placeholder="Enter your username" required autocomplete="username">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                    <input type="password" class="form-control" id="password" name="password" 
+                                        placeholder="Enter your password" required autocomplete="current-password">
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary">Sign In</button>
+                            </div>
+                            <div class="alert alert-danger mt-3 d-none" id="login-error"></div>
+                            {% if error %}
+                            <div class="alert alert-danger mt-3">
+                                {{ error }}
+                            </div>
+                            {% endif %}
+                        </form>
+                    </div>
+                    <div class="card-footer bg-white text-center py-3">
+                        <p class="mb-0 text-muted small">© 2025 Restaurant Management System</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Inline script để xử lý đăng nhập ngay trong trang
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.getElementById('login-form');
+        if (loginForm) {
+            console.log('Login form found, attaching event listener');
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                console.log('Attempting login for user:', username);
+                
+                // Show the error div for debugging
+                const errorElement = document.getElementById('login-error');
+                if (errorElement) {
+                    errorElement.textContent = 'Đang thực hiện đăng nhập...';
+                    errorElement.classList.remove('d-none');
+                }
+                
+                fetch('/api/v1/auth/login/json', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password }),
+                    credentials: 'include'
+                })
+                .then(response => {
+                    console.log('Login response status:', response.status);
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            throw new Error(data.detail || 'Đăng nhập thất bại');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Login successful');
+                    // Chuyển hướng đến dashboard
+                    window.location.href = '/dashboard';
+                })
+                .catch(error => {
+                    console.error('Login error:', error);
+                    if (errorElement) {
+                        errorElement.textContent = error.message || 'Đăng nhập thất bại';
+                        errorElement.classList.remove('d-none');
+                    }
+                });
+            });
+        } else {
+            console.warn('Login form not found');
+        }
+    });
+    </script>
+</body>
+</html>

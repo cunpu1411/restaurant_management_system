@@ -1,0 +1,1186 @@
+{% extends "base.html" %}
+
+{% block title %}Table Management - Restaurant Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .table-card {
+        height: 180px;
+        position: relative;
+        transition: transform 0.3s;
+    }
+    .table-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .table-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+    }
+    .table-status {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+    .table-info {
+        position: absolute;
+        bottom: 15px;
+        left: 20px;
+        right: 20px;
+    }
+    .table-capacity {
+        position: absolute;
+        top: 15px;
+        left: 20px;
+        font-size: 0.9rem;
+    }
+    .table-actions {
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+    }
+    .table-available {
+        background-color: #e8f5e9;
+        border-color: #c8e6c9;
+    }
+    .table-occupied {
+        background-color: #ffebee;
+        border-color: #ffcdd2;
+    }
+    .table-reserved {
+        background-color: #fff8e1;
+        border-color: #ffecb3;
+    }
+    .floor-plan {
+        position: relative;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Table Management Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Table Management</h1>
+        <div class="btn-toolbar">
+            <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addTableModal">
+                <i class="bi bi-plus-circle"></i> Add Table
+            </button>
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteTableModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this table? This action cannot be undone.</p>
+                <input type="hidden" id="deleteTableId">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteTable">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reserve Table Modal -->
+<div class="modal fade" id="reserveTableModal" tabindex="-1" aria-labelledby="reserveTableModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reserveTableModalLabel">Reserve Table</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="reserveTableForm" class="needs-validation" novalidate>
+                    <input type="hidden" id="reserveTableId">
+                    <div class="mb-3">
+                        <label for="reservationCustomer" class="form-label">Customer</label>
+                        <div class="input-group mb-3">
+                            <select class="form-select" id="reservationCustomer" required>
+                                <option value="">Select a customer</option>
+                                <option value="1">John Doe</option>
+                                <option value="2">Jane Smith</option>
+                                <option value="3">Robert Johnson</option>
+                            </select>
+                            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#newReservationCustomerForm">
+                                <i class="bi bi-plus"></i> New
+                            </button>
+                        </div>
+                        <div class="invalid-feedback">Please select a customer.</div>
+                    </div>
+                    
+                    <div class="collapse mb-3" id="newReservationCustomerForm">
+                        <div class="card card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="reservationCustomerName" class="form-label">Customer Name</label>
+                                    <input type="text" class="form-control" id="reservationCustomerName">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="reservationCustomerPhone" class="form-label">Phone Number</label>
+                                    <input type="tel" class="form-control" id="reservationCustomerPhone">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="reservationDate" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="reservationDate" required>
+                        <div class="invalid-feedback">Please select a date.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="reservationTime" class="form-label">Time</label>
+                        <input type="time" class="form-control" id="reservationTime" required>
+                        <div class="invalid-feedback">Please select a time.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="reservationPartySize" class="form-label">Party Size</label>
+                        <input type="number" class="form-control" id="reservationPartySize" min="1" required>
+                        <div class="invalid-feedback">Please enter the number of guests.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="reservationNotes" class="form-label">Special Notes</label>
+                        <textarea class="form-control" id="reservationNotes" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="reserveTableForm" class="btn btn-primary">Reserve Table</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Reservation Modal -->
+<div class="modal fade" id="viewReservationModal" tabindex="-1" aria-labelledby="viewReservationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewReservationModalLabel">Reservation Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Reservation Information</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <th>Table:</th>
+                                <td>T3</td>
+                            </tr>
+                            <tr>
+                                <th>Customer:</th>
+                                <td>John Doe</td>
+                            </tr>
+                            <tr>
+                                <th>Contact:</th>
+                                <td>+1 (555) 123-4567</td>
+                            </tr>
+                            <tr>
+                                <th>Date:</th>
+                                <td>April 6, 2025</td>
+                            </tr>
+                            <tr>
+                                <th>Time:</th>
+                                <td>6:30 PM</td>
+                            </tr>
+                            <tr>
+                                <th>Party Size:</th>
+                                <td>2 people</td>
+                            </tr>
+                            <tr>
+                                <th>Status:</th>
+                                <td><span class="badge bg-warning">Pending</span></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Special Notes</h6>
+                        <p>Anniversary dinner. Customer requested a window table if possible.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newOrderForTableModal" data-table-id="3">
+                    Create Order
+                </button>
+                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editReservationModal">
+                    Edit
+                </button>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelReservationModal">
+                    Cancel Reservation
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Reservation Modal -->
+<div class="modal fade" id="cancelReservationModal" tabindex="-1" aria-labelledby="cancelReservationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancelReservationModalLabel">Cancel Reservation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to cancel this reservation?</p>
+                <div class="mb-3">
+                    <label for="cancellationReason" class="form-label">Reason (Optional)</label>
+                    <select class="form-select" id="cancellationReason">
+                        <option value="">Select a reason</option>
+                        <option value="customer_request">Customer Request</option>
+                        <option value="no_show">No Show</option>
+                        <option value="overbooking">Overbooking</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="cancellationNotes" class="form-label">Notes</label>
+                    <textarea class="form-control" id="cancellationNotes" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" id="confirmCancelReservation">Cancel Reservation</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Checkout Table Modal -->
+<div class="modal fade" id="checkoutTableModal" tabindex="-1" aria-labelledby="checkoutTableModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="checkoutTableModalLabel">Checkout Table</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6>Order Information</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <th>Order ID:</th>
+                                <td>#1002</td>
+                            </tr>
+                            <tr>
+                                <th>Table:</th>
+                                <td>T2</td>
+                            </tr>
+                            <tr>
+                                <th>Server:</th>
+                                <td>Maria Johnson</td>
+                            </tr>
+                            <tr>
+                                <th>Order Time:</th>
+                                <td>11:20 AM</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Order Summary</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <th>Items:</th>
+                                <td>5</td>
+                            </tr>
+                            <tr>
+                                <th>Subtotal:</th>
+                                <td>$68.95</td>
+                            </tr>
+                            <tr>
+                                <th>Tax (15%):</th>
+                                <td>$10.34</td>
+                            </tr>
+                            <tr>
+                                <th>Service Charge (10%):</th>
+                                <td>$6.90</td>
+                            </tr>
+                            <tr>
+                                <th>Total Due:</th>
+                                <td><strong>$86.19</strong></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">Payment Method</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <select class="form-select" id="paymentMethod">
+                                    <option value="cash">Cash</option>
+                                    <option value="credit_card">Credit Card</option>
+                                    <option value="debit_card">Debit Card</option>
+                                    <option value="mobile_payment">Mobile Payment</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="number" class="form-control" id="amountPaid" placeholder="Amount Paid">
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3" id="creditCardForm">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="cardNumber" class="form-label">Card Number</label>
+                                    <input type="text" class="form-control" id="cardNumber" placeholder="XXXX XXXX XXXX XXXX">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="expiryDate" class="form-label">Expiry Date</label>
+                                    <input type="text" class="form-control" id="expiryDate" placeholder="MM/YY">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="cvv" class="form-label">CVV</label>
+                                    <input type="text" class="form-control" id="cvv" placeholder="123">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" value="" id="printReceipt" checked>
+                    <label class="form-check-label" for="printReceipt">
+                        Print Receipt
+                    </label>
+                </div>
+                
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" value="" id="emailReceipt">
+                    <label class="form-check-label" for="emailReceipt">
+                        Email Receipt
+                    </label>
+                </div>
+                
+                <div class="collapse" id="emailReceiptForm">
+                    <div class="mb-3">
+                        <label for="customerEmail" class="form-label">Customer Email</label>
+                        <input type="email" class="form-control" id="customerEmail" placeholder="customer@example.com">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Process Payment</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // View toggle
+        const viewLinks = document.querySelectorAll('.dropdown-item[data-view]');
+        const gridView = document.getElementById('gridView');
+        const floorPlanView = document.getElementById('floorPlanView');
+        
+        viewLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all links
+                viewLinks.forEach(l => l.classList.remove('active'));
+                
+                // Add active class to clicked link
+                this.classList.add('active');
+                
+                // Update dropdown button text
+                const view = this.dataset.view;
+                document.getElementById('viewDropdown').textContent = 'View: ' + (view === 'grid' ? 'Grid' : 'Floor Plan');
+                
+                // Toggle views
+                if (view === 'grid') {
+                    gridView.classList.remove('d-none');
+                    floorPlanView.classList.add('d-none');
+                } else {
+                    gridView.classList.add('d-none');
+                    floorPlanView.classList.remove('d-none');
+                }
+            });
+        });
+        
+        // Table status filter
+        const tableStatusFilters = document.querySelectorAll('input[name="tableStatusFilter"]');
+        tableStatusFilters.forEach(filter => {
+            filter.addEventListener('change', function() {
+                const status = this.value;
+                console.log('Filtering tables by status:', status);
+                
+                // In a real implementation, this would filter the tables based on status
+            });
+        });
+        
+        // Table search
+        const searchInput = document.getElementById('searchTables');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                console.log('Searching for:', searchTerm);
+                
+                // In a real implementation, this would filter the tables based on the search term
+            });
+        }
+        
+        // Initialize edit modal with table data
+        const editTableModal = document.getElementById('editTableModal');
+        if (editTableModal) {
+            editTableModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const tableId = button.getAttribute('data-table-id');
+                
+                // In a real implementation, this would fetch the table data from the API
+                console.log('Editing table:', tableId);
+                
+                // For demonstration purposes, populate with dummy data
+                document.getElementById('editTableId').value = tableId;
+                
+                if (tableId === '1') {
+                    document.getElementById('editTableNumber').value = 'T1';
+                    document.getElementById('editTableCapacity').value = '4';
+                    document.getElementById('editTableLocation').value = 'main';
+                    document.getElementById('editStatusAvailable').checked = true;
+                } else if (tableId === '2') {
+                    document.getElementById('editTableNumber').value = 'T2';
+                    document.getElementById('editTableCapacity').value = '4';
+                    document.getElementById('editTableLocation').value = 'window';
+                    document.getElementById('editStatusAvailable').checked = true;
+                }
+            });
+        }
+        
+        // Delete table confirmation
+        const deleteTableModal = document.getElementById('deleteTableModal');
+        if (deleteTableModal) {
+            deleteTableModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const tableId = button.getAttribute('data-table-id');
+                document.getElementById('deleteTableId').value = tableId;
+            });
+            
+            const confirmDeleteBtn = document.getElementById('confirmDeleteTable');
+            if (confirmDeleteBtn) {
+                confirmDeleteBtn.addEventListener('click', function() {
+                    const tableId = document.getElementById('deleteTableId').value;
+                    console.log('Deleting table:', tableId);
+                    
+                    // In a real implementation, this would make an API call to delete the table
+                    // For demonstration, just close the modal
+                    const modal = bootstrap.Modal.getInstance(deleteTableModal);
+                    modal.hide();
+                });
+            }
+        }
+        
+        // Payment method toggle for checkout
+        const paymentMethod = document.getElementById('paymentMethod');
+        const creditCardForm = document.getElementById('creditCardForm');
+        
+        if (paymentMethod && creditCardForm) {
+            paymentMethod.addEventListener('change', function() {
+                if (this.value === 'credit_card' || this.value === 'debit_card') {
+                    creditCardForm.classList.remove('d-none');
+                } else {
+                    creditCardForm.classList.add('d-none');
+                }
+            });
+        }
+        
+        // Email receipt toggle
+        const emailReceipt = document.getElementById('emailReceipt');
+        const emailReceiptForm = document.getElementById('emailReceiptForm');
+        
+        if (emailReceipt && emailReceiptForm) {
+            emailReceipt.addEventListener('change', function() {
+                if (this.checked) {
+                    emailReceiptForm.classList.remove('collapse');
+                } else {
+                    emailReceiptForm.classList.add('collapse');
+                }
+            });
+        }
+        
+        // Form validation
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                } else {
+                    // For demo purposes, prevent actual form submission
+                    event.preventDefault();
+                    
+                    // Show success message or redirect in a real implementation
+                    if (form.id === 'addTableForm') {
+                        alert('Table added successfully!');
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('addTableModal'));
+                        modal.hide();
+                    } else if (form.id === 'editTableForm') {
+                        alert('Table updated successfully!');
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('editTableModal'));
+                        modal.hide();
+                    } else if (form.id === 'reserveTableForm') {
+                        alert('Table reserved successfully!');
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('reserveTableModal'));
+                        modal.hide();
+                    }
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    });
+</script>
+{% endblock %}dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="viewDropdown" data-bs-toggle="dropdown">
+                    View: Grid
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="viewDropdown">
+                    <li><a class="dropdown-item active" href="#" data-view="grid">Grid View</a></li>
+                    <li><a class="dropdown-item" href="#" data-view="floorplan">Floor Plan View</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Status Filter -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="btn-group" role="group">
+                        <input type="radio" class="btn-check" name="tableStatusFilter" id="allTables" checked>
+                        <label class="btn btn-outline-secondary" for="allTables">All Tables</label>
+
+                        <input type="radio" class="btn-check" name="tableStatusFilter" id="availableTables">
+                        <label class="btn btn-outline-success" for="availableTables">Available</label>
+
+                        <input type="radio" class="btn-check" name="tableStatusFilter" id="occupiedTables">
+                        <label class="btn btn-outline-danger" for="occupiedTables">Occupied</label>
+
+                        <input type="radio" class="btn-check" name="tableStatusFilter" id="reservedTables">
+                        <label class="btn btn-outline-warning" for="reservedTables">Reserved</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control" id="searchTables" placeholder="Search tables...">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid View -->
+    <div id="gridView">
+        <div class="row" id="tablesContainer">
+            <!-- Table 1 - Available -->
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card table-card table-available shadow-sm">
+                    <div class="table-capacity">
+                        <i class="bi bi-person"></i> Capacity: 4
+                    </div>
+                    <div class="table-status">
+                        <span class="badge bg-success">Available</span>
+                    </div>
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <div class="text-center">
+                            <div class="table-number">T1</div>
+                        </div>
+                    </div>
+                    <div class="table-info">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#newOrderForTableModal" data-table-id="1">
+                                    <i class="bi bi-plus"></i> New Order
+                                </button>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="tableActions1" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="tableActions1">
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editTableModal" data-table-id="1">Edit</a></li>
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#reserveTableModal" data-table-id="1">Reserve</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#deleteTableModal" data-table-id="1">Delete</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table 2 - Occupied -->
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card table-card table-occupied shadow-sm">
+                    <div class="table-capacity">
+                        <i class="bi bi-person"></i> Capacity: 4
+                    </div>
+                    <div class="table-status">
+                        <span class="badge bg-danger">Occupied</span>
+                    </div>
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <div class="text-center">
+                            <div class="table-number">T2</div>
+                            <small class="text-muted">Order #1002</small>
+                        </div>
+                    </div>
+                    <div class="table-info">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewOrderModal" data-order-id="1002">
+                                    <i class="bi bi-eye"></i> View Order
+                                </button>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="tableActions2" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="tableActions2">
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#checkoutTableModal" data-table-id="2">Checkout</a></li>
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editTableModal" data-table-id="2">Edit</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#deleteTableModal" data-table-id="2">Delete</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table 3 - Reserved -->
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card table-card table-reserved shadow-sm">
+                    <div class="table-capacity">
+                        <i class="bi bi-person"></i> Capacity: 2
+                    </div>
+                    <div class="table-status">
+                        <span class="badge bg-warning">Reserved</span>
+                    </div>
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <div class="text-center">
+                            <div class="table-number">T3</div>
+                            <small class="text-muted">6:30 PM - John Doe</small>
+                        </div>
+                    </div>
+                    <div class="table-info">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#newOrderForTableModal" data-table-id="3">
+                                    <i class="bi bi-plus"></i> New Order
+                                </button>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="tableActions3" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="tableActions3">
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#viewReservationModal" data-table-id="3">View Reservation</a></li>
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editTableModal" data-table-id="3">Edit</a></li>
+                                    <li><a class="dropdown-item text-warning" href="#" data-bs-toggle="modal" data-bs-target="#cancelReservationModal" data-table-id="3">Cancel Reservation</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#deleteTableModal" data-table-id="3">Delete</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table 4 - Available -->
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card table-card table-available shadow-sm">
+                    <div class="table-capacity">
+                        <i class="bi bi-person"></i> Capacity: 4
+                    </div>
+                    <div class="table-status">
+                        <span class="badge bg-success">Available</span>
+                    </div>
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <div class="text-center">
+                            <div class="table-number">T4</div>
+                        </div>
+                    </div>
+                    <div class="table-info">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#newOrderForTableModal" data-table-id="4">
+                                    <i class="bi bi-plus"></i> New Order
+                                </button>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="tableActions4" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="tableActions4">
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editTableModal" data-table-id="4">Edit</a></li>
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#reserveTableModal" data-table-id="4">Reserve</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#deleteTableModal" data-table-id="4">Delete</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- More Tables Following Same Pattern -->
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card table-card table-available shadow-sm">
+                    <div class="table-capacity">
+                        <i class="bi bi-person"></i> Capacity: 8
+                    </div>
+                    <div class="table-status">
+                        <span class="badge bg-success">Available</span>
+                    </div>
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <div class="text-center">
+                            <div class="table-number">T5</div>
+                        </div>
+                    </div>
+                    <div class="table-info">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#newOrderForTableModal" data-table-id="5">
+                                    <i class="bi bi-plus"></i> New Order
+                                </button>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="tableActions5" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="tableActions5">
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editTableModal" data-table-id="5">Edit</a></li>
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#reserveTableModal" data-table-id="5">Reserve</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#deleteTableModal" data-table-id="5">Delete</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card table-card table-occupied shadow-sm">
+                    <div class="table-capacity">
+                        <i class="bi bi-person"></i> Capacity: 2
+                    </div>
+                    <div class="table-status">
+                        <span class="badge bg-danger">Occupied</span>
+                    </div>
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <div class="text-center">
+                            <div class="table-number">T6</div>
+                            <small class="text-muted">Order #1001</small>
+                        </div>
+                    </div>
+                    <div class="table-info">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewOrderModal" data-order-id="1001">
+                                    <i class="bi bi-eye"></i> View Order
+                                </button>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="tableActions6" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="tableActions6">
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#checkoutTableModal" data-table-id="6">Checkout</a></li>
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editTableModal" data-table-id="6">Edit</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#deleteTableModal" data-table-id="6">Delete</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floor Plan View (Hidden by default) -->
+    <div id="floorPlanView" class="d-none">
+        <div class="floor-plan" style="height: 600px;">
+            <h5 class="text-center mb-4">Restaurant Floor Plan</h5>
+            
+            <!-- This would be replaced with an actual interactive floor plan in a real implementation -->
+            <div class="text-center">
+                <p class="text-muted">Interactive floor plan would be displayed here.</p>
+                <p>The floor plan would show the layout of tables and their current status.</p>
+                <p>Tables could be dragged and positioned according to the restaurant layout.</p>
+                <p>Clicking on a table would show available actions.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Table Modal -->
+<div class="modal fade" id="addTableModal" tabindex="-1" aria-labelledby="addTableModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTableModalLabel">Add New Table</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addTableForm" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="tableNumber" class="form-label">Table Number</label>
+                        <input type="text" class="form-control" id="tableNumber" required>
+                        <div class="invalid-feedback">Please enter a table number.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tableCapacity" class="form-label">Capacity</label>
+                        <input type="number" class="form-control" id="tableCapacity" min="1" value="4" required>
+                        <div class="invalid-feedback">Capacity must be at least 1.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tableLocation" class="form-label">Location</label>
+                        <select class="form-select" id="tableLocation">
+                            <option value="main">Main Area</option>
+                            <option value="window">Window Side</option>
+                            <option value="corner">Corner</option>
+                            <option value="outdoor">Outdoor</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="tableStatus" id="statusAvailable" value="available" checked>
+                                <label class="form-check-label" for="statusAvailable">Available</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="tableStatus" id="statusReserved" value="reserved">
+                                <label class="form-check-label" for="statusReserved">Reserved</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="tableStatus" id="statusOutOfService" value="outofservice">
+                                <label class="form-check-label" for="statusOutOfService">Out of Service</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="addTableForm" class="btn btn-primary">Add Table</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Table Modal -->
+<div class="modal fade" id="editTableModal" tabindex="-1" aria-labelledby="editTableModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editTableModalLabel">Edit Table</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editTableForm" class="needs-validation" novalidate>
+                    <input type="hidden" id="editTableId">
+                    <div class="mb-3">
+                        <label for="editTableNumber" class="form-label">Table Number</label>
+                        <input type="text" class="form-control" id="editTableNumber" required>
+                        <div class="invalid-feedback">Please enter a table number.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editTableCapacity" class="form-label">Capacity</label>
+                        <input type="number" class="form-control" id="editTableCapacity" min="1" required>
+                        <div class="invalid-feedback">Capacity must be at least 1.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editTableLocation" class="form-label">Location</label>
+                        <select class="form-select" id="editTableLocation">
+                            <option value="main">Main Area</option>
+                            <option value="window">Window Side</option>
+                            <option value="corner">Corner</option>
+                            <option value="outdoor">Outdoor</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="editTableStatus" id="editStatusAvailable" value="available">
+                                <label class="form-check-label" for="editStatusAvailable">Available</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="editTableStatus" id="editStatusReserved" value="reserved">
+                                <label class="form-check-label" for="editStatusReserved">Reserved</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="editTableStatus" id="editStatusOutOfService" value="outofservice">
+                                <label class="form-check-label" for="editStatusOutOfService">Out of Service</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="editTableForm" class="btn btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Table Modal -->
+<div class="modal fade" id="deleteTableModal" tabindex="-1" aria-labelledby="deleteTableModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal fade" id="viewOrderModal" tabindex="-1" aria-labelledby="viewOrderModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="viewOrderModalLabel">Order #1002 Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- Similar content as Order Detail Modal in orders.html -->
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i> Order details would be displayed here.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary">Print Receipt</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New Order For Table Modal -->
+            <div class="modal fade" id="newOrderForTableModal" tabindex="-1" aria-labelledby="newOrderForTableModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="newOrderForTableModalLabel">New Order - Table T1</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- Similar content as New Order Modal in orders.html but with pre-selected table -->
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i> New order form for the selected table would be displayed here.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary">Create Order</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // View toggle
+    const viewLinks = document.querySelectorAll('.dropdown-item[data-view]');
+    const gridView = document.getElementById('gridView');
+    const floorPlanView = document.getElementById('floorPlanView');
+    
+    viewLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Remove active class from all links
+            viewLinks.forEach(l => l.classList.remove('active'));
+            
+            // Add active class to clicked link
+            this.classList.add('active');
+            
+            // Update dropdown button text
+            const view = this.dataset.view;
+            document.getElementById('viewDropdown').textContent = 'View: ' + (view === 'grid' ? 'Grid' : 'Floor Plan');
+            
+            // Toggle views
+            if (view === 'grid') {
+                gridView.classList.remove('d-none');
+                floorPlanView.classList.add('d-none');
+            } else {
+                gridView.classList.add('d-none');
+                floorPlanView.classList.remove('d-none');
+            }
+        });
+    });
+    
+    // Table status filter
+    const tableStatusFilters = document.querySelectorAll('input[name="tableStatusFilter"]');
+    tableStatusFilters.forEach(filter => {
+        filter.addEventListener('change', function() {
+            const status = this.value;
+            console.log('Filtering tables by status:', status);
+            
+            // In a real implementation, this would filter the tables based on status
+        });
+    });
+    
+    // Table search
+    const searchInput = document.getElementById('searchTables');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            console.log('Searching for:', searchTerm);
+            
+            // In a real implementation, this would filter the tables based on the search term
+        });
+    }
+    
+    // Initialize modals with table data
+    const newOrderForTableModal = document.getElementById('newOrderForTableModal');
+    if (newOrderForTableModal) {
+        newOrderForTableModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const tableId = button.getAttribute('data-table-id');
+            
+            // Update modal title with table ID
+            document.getElementById('newOrderForTableModalLabel').textContent = `New Order - Table T${tableId}`;
+            
+            // In a real implementation, this would pre-select the table in the form
+            console.log('Creating new order for table:', tableId);
+        });
+    }
+    
+    // Initialize edit modal with table data
+    const editTableModal = document.getElementById('editTableModal');
+    if (editTableModal) {
+        editTableModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const tableId = button.getAttribute('data-table-id');
+            
+            // In a real implementation, this would fetch the table data from the API
+            console.log('Editing table:', tableId);
+            
+            // For demonstration purposes, populate with dummy data
+            document.getElementById('editTableId').value = tableId;
+            
+            if (tableId === '1') {
+                document.getElementById('editTableNumber').value = 'T1';
+                document.getElementById('editTableCapacity').value = '4';
+                document.getElementById('editTableLocation').value = 'main';
+                document.getElementById('editStatusAvailable').checked = true;
+            } else if (tableId === '2') {
+                document.getElementById('editTableNumber').value = 'T2';
+                document.getElementById('editTableCapacity').value = '4';
+                document.getElementById('editTableLocation').value = 'window';
+                document.getElementById('editStatusAvailable').checked = true;
+            }
+        });
+    }
+    
+    // Reserve table modal
+    const reserveTableModal = document.getElementById('reserveTableModal');
+    if (reserveTableModal) {
+        reserveTableModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const tableId = button.getAttribute('data-table-id');
+            document.getElementById('reserveTableId').value = tableId;
+            
+            // Set today's date as default
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('reservationDate').value = today;
+        });
+    }
+    
+    // Delete table confirmation
+    const deleteTableModal = document.getElementById('deleteTableModal');
+    if (deleteTableModal) {
+        deleteTableModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const tableId = button.getAttribute('data-table-id');
+            document.getElementById('deleteTableId').value = tableId;
+        });
+        
+        const confirmDeleteBtn = document.getElementById('confirmDeleteTable');
+        if (confirmDeleteBtn) {
+            confirmDeleteBtn.addEventListener('click', function() {
+                const tableId = document.getElementById('deleteTableId').value;
+                console.log('Deleting table:', tableId);
+                
+                // In a real implementation, this would make an API call to delete the table
+                // For demonstration, just close the modal
+                const modal = bootstrap.Modal.getInstance(deleteTableModal);
+                modal.hide();
+            });
+        }
+    }
+    
+    // Cancel reservation confirmation
+    const cancelReservationModal = document.getElementById('cancelReservationModal');
+    if (cancelReservationModal) {
+        const confirmCancelBtn = document.getElementById('confirmCancelReservation');
+        if (confirmCancelBtn) {
+            confirmCancelBtn.addEventListener('click', function() {
+                const reason = document.getElementById('cancellationReason').value;
+                const notes = document.getElementById('cancellationNotes').value;
+                console.log('Cancelling reservation, reason:', reason, 'notes:', notes);
+                
+                // In a real implementation, this would make an API call to cancel the reservation
+                // For demonstration, just close the modal
+                const modal = bootstrap.Modal.getInstance(cancelReservationModal);
+                modal.hide();
+            });
+        }
+    }
+    
+    // Form validation
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            } else {
+                // For demo purposes, prevent actual form submission
+                event.preventDefault();
+                
+                // Show success message or redirect in a real implementation
+                if (form.id === 'addTableForm') {
+                    alert('Table added successfully!');
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addTableModal'));
+                    modal.hide();
+                } else if (form.id === 'editTableForm') {
+                    alert('Table updated successfully!');
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editTableModal'));
+                    modal.hide();
+                } else if (form.id === 'reserveTableForm') {
+                    alert('Table reserved successfully!');
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('reserveTableModal'));
+                    modal.hide();
+                }
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+});
+</script>
+{% endblock %}

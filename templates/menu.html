@@ -1,0 +1,577 @@
+{% extends "base.html" %}
+
+{% block title %}Menu Management - Restaurant Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .menu-item-card .card-img-top {
+        height: 180px;
+        object-fit: cover;
+        background-color: #f8f9fa;
+    }
+    .placeholder-image {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 180px;
+        background-color: #f8f9fa;
+        color: #6c757d;
+    }
+    .category-filter .btn {
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+    .price-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 1rem;
+        font-weight: bold;
+    }
+    .availability-toggle {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Menu Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Menu Management</h1>
+        <div class="btn-toolbar">
+            <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addItemModal">
+                <i class="bi bi-plus-circle"></i> Add Item
+            </button>
+            <button class="btn btn-outline-secondary me-2" data-bs-toggle="modal" data-bs-target="#categoryModal">
+                <i class="bi bi-tags"></i> Manage Categories
+            </button>
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown">
+                    Sort
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+                    <li><a class="dropdown-item" href="#" data-sort="name-asc">Name (A-Z)</a></li>
+                    <li><a class="dropdown-item" href="#" data-sort="name-desc">Name (Z-A)</a></li>
+                    <li><a class="dropdown-item" href="#" data-sort="price-asc">Price (Low to High)</a></li>
+                    <li><a class="dropdown-item" href="#" data-sort="price-desc">Price (High to Low)</a></li>
+                    <li><a class="dropdown-item" href="#" data-sort="popular">Popularity</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control" id="searchMenu" placeholder="Search for items...">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="showUnavailable">
+                        <label class="form-check-label" for="showUnavailable">Show unavailable items</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="category-filter mt-3">
+                <label class="form-label">Filter by Category:</label>
+                <div>
+                    <button class="btn btn-sm btn-primary active" data-category="all">All</button>
+                    <button class="btn btn-sm btn-outline-primary" data-category="main-course">Main Course</button>
+                    <button class="btn btn-sm btn-outline-primary" data-category="appetizers">Appetizers</button>
+                    <button class="btn btn-sm btn-outline-primary" data-category="desserts">Desserts</button>
+                    <button class="btn btn-sm btn-outline-primary" data-category="beverages">Beverages</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Items Grid -->
+    <div class="row" id="menuItemsContainer">
+        <!-- Main Course Items -->
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card menu-item-card shadow-sm">
+                <div class="price-badge badge bg-primary">$18.99</div>
+                <div class="placeholder-image">
+                    <i class="bi bi-image fs-1"></i>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Grilled Salmon</h5>
+                    <p class="card-text text-muted">Fresh salmon with herbs</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge bg-info">Main Course</span>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editItemModal" data-id="1">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-id="1">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-check form-switch availability-toggle">
+                        <input class="form-check-input" type="checkbox" id="available1" checked>
+                        <label class="form-check-label" for="available1">Available</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card menu-item-card shadow-sm">
+                <div class="price-badge badge bg-primary">$22.99</div>
+                <div class="placeholder-image">
+                    <i class="bi bi-image fs-1"></i>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Beef Steak</h5>
+                    <p class="card-text text-muted">Premium cut with sauce</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge bg-info">Main Course</span>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editItemModal" data-id="2">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-id="2">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-check form-switch availability-toggle">
+                        <input class="form-check-input" type="checkbox" id="available2" checked>
+                        <label class="form-check-label" for="available2">Available</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Appetizer Item -->
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card menu-item-card shadow-sm">
+                <div class="price-badge badge bg-primary">$10.99</div>
+                <div class="placeholder-image">
+                    <i class="bi bi-image fs-1"></i>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Cheese Platter</h5>
+                    <p class="card-text text-muted">Selection of cheeses</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge bg-warning">Appetizers</span>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editItemModal" data-id="3">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-id="3">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-check form-switch availability-toggle">
+                        <input class="form-check-input" type="checkbox" id="available3" checked>
+                        <label class="form-check-label" for="available3">Available</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dessert Item -->
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card menu-item-card shadow-sm">
+                <div class="price-badge badge bg-primary">$7.99</div>
+                <div class="placeholder-image">
+                    <i class="bi bi-image fs-1"></i>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Chocolate Cake</h5>
+                    <p class="card-text text-muted">Rich chocolate cake</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge bg-danger">Desserts</span>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editItemModal" data-id="4">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-id="4">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-check form-switch availability-toggle">
+                        <input class="form-check-input" type="checkbox" id="available4" checked>
+                        <label class="form-check-label" for="available4">Available</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Beverage Item -->
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card menu-item-card shadow-sm">
+                <div class="price-badge badge bg-primary">$4.99</div>
+                <div class="placeholder-image">
+                    <i class="bi bi-image fs-1"></i>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Fresh Orange Juice</h5>
+                    <p class="card-text text-muted">Freshly squeezed</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge bg-success">Beverages</span>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editItemModal" data-id="5">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-id="5">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-check form-switch availability-toggle">
+                        <input class="form-check-input" type="checkbox" id="available5" checked>
+                        <label class="form-check-label" for="available5">Available</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+            </li>
+            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item">
+                <a class="page-link" href="#">Next</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<!-- Add Item Modal -->
+<div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addItemModalLabel">Add Menu Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addItemForm" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="itemName" class="form-label">Item Name</label>
+                        <input type="text" class="form-control" id="itemName" required>
+                        <div class="invalid-feedback">Please enter a name for the item.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="itemCategory" class="form-label">Category</label>
+                        <select class="form-select" id="itemCategory" required>
+                            <option value="">Select a category</option>
+                            <option value="1">Main Course</option>
+                            <option value="2">Appetizers</option>
+                            <option value="3">Desserts</option>
+                            <option value="4">Beverages</option>
+                        </select>
+                        <div class="invalid-feedback">Please select a category.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="itemPrice" class="form-label">Price</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="itemPrice" step="0.01" min="0" required>
+                            <div class="invalid-feedback">Please enter a valid price.</div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="itemDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="itemDescription" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="itemAvailable" checked>
+                        <label class="form-check-label" for="itemAvailable">Available</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="addItemForm" class="btn btn-primary">Add Item</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Item Modal -->
+<div class="modal fade" id="editItemModal" tabindex="-1" aria-labelledby="editItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editItemModalLabel">Edit Menu Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editItemForm" class="needs-validation" novalidate>
+                    <input type="hidden" id="editItemId">
+                    <div class="mb-3">
+                        <label for="editItemName" class="form-label">Item Name</label>
+                        <input type="text" class="form-control" id="editItemName" required>
+                        <div class="invalid-feedback">Please enter a name for the item.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editItemCategory" class="form-label">Category</label>
+                        <select class="form-select" id="editItemCategory" required>
+                            <option value="">Select a category</option>
+                            <option value="1">Main Course</option>
+                            <option value="2">Appetizers</option>
+                            <option value="3">Desserts</option>
+                            <option value="4">Beverages</option>
+                        </select>
+                        <div class="invalid-feedback">Please select a category.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editItemPrice" class="form-label">Price</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="editItemPrice" step="0.01" min="0" required>
+                            <div class="invalid-feedback">Please enter a valid price.</div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editItemDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="editItemDescription" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="editItemAvailable">
+                        <label class="form-check-label" for="editItemAvailable">Available</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="editItemForm" class="btn btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Category Management Modal -->
+<div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="categoryModalLabel">Manage Categories</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0">Available Categories</h6>
+                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#addCategoryForm">
+                        <i class="bi bi-plus-circle"></i> Add New
+                    </button>
+                </div>
+                
+                <!-- Add Category Form -->
+                <div class="collapse mb-3" id="addCategoryForm">
+                    <div class="card card-body">
+                        <form id="newCategoryForm" class="needs-validation" novalidate>
+                            <div class="mb-3">
+                                <label for="categoryName" class="form-label">Category Name</label>
+                                <input type="text" class="form-control" id="categoryName" required>
+                                <div class="invalid-feedback">Please enter a category name.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="categoryDescription" class="form-label">Description</label>
+                                <textarea class="form-control" id="categoryDescription" rows="2"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add Category</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Categories List -->
+                <ul class="list-group" id="categoriesList">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Main Course</strong>
+                            <p class="mb-0 text-muted small">Primary dishes</p>
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-outline-secondary" data-id="1">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-danger" data-id="1">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Appetizers</strong>
+                            <p class="mb-0 text-muted small">Starters</p>
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-outline-secondary" data-id="2">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-danger" data-id="2">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Desserts</strong>
+                            <p class="mb-0 text-muted small">Sweet dishes</p>
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-outline-secondary" data-id="3">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-danger" data-id="3">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Beverages</strong>
+                            <p class="mb-0 text-muted small">Drinks</p>
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-outline-secondary" data-id="4">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-danger" data-id="4">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this item? This action cannot be undone.</p>
+                <input type="hidden" id="deleteItemId">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Category filter buttons
+        const categoryButtons = document.querySelectorAll('.category-filter .btn');
+        categoryButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                categoryButtons.forEach(btn => btn.classList.remove('active', 'btn-primary'));
+                categoryButtons.forEach(btn => btn.classList.add('btn-outline-primary'));
+                
+                // Add active class to clicked button
+                this.classList.remove('btn-outline-primary');
+                this.classList.add('active', 'btn-primary');
+                
+                // Filter menu items (would be AJAX in real implementation)
+                const category = this.dataset.category;
+                console.log('Filtering by category:', category);
+            });
+        });
+        
+        // Search functionality
+        const searchInput = document.getElementById('searchMenu');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                console.log('Searching for:', searchTerm);
+                
+                // In a real implementation, this would filter the items or make an API call
+            });
+        }
+        
+        // Toggle availability switch
+        const availabilitySwitches = document.querySelectorAll('.availability-toggle input');
+        availabilitySwitches.forEach(toggleSwitch => {
+            toggleSwitch.addEventListener('change', function() {
+                const itemId = this.id.replace('available', '');
+                console.log('Toggling availability for item:', itemId, 'Available:', this.checked);
+                
+                // In a real implementation, this would make an API call to update the item
+            });
+        });
+        
+        // Initialize the edit modal with item data
+        const editItemModal = document.getElementById('editItemModal');
+        if (editItemModal) {
+            editItemModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const itemId = button.getAttribute('data-id');
+                
+                // In a real implementation, this would fetch the item data from the API
+                console.log('Editing item:', itemId);
+                
+                // For demonstration purposes, populate with dummy data
+                document.getElementById('editItemId').value = itemId;
+                
+                if (itemId === '1') {
+                    document.getElementById('editItemName').value = 'Grilled Salmon';
+                    document.getElementById('editItemCategory').value = '1';
+                    document.getElementById('editItemPrice').value = '18.99';
+                    document.getElementById('editItemDescription').value = 'Fresh salmon with herbs';
+                    document.getElementById('editItemAvailable').checked = true;
+                }
+            });
+        }
+        
+        // Handle delete confirmation
+        const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+        if (deleteConfirmModal) {
+            deleteConfirmModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const itemId = button.getAttribute('data-id');
+                document.getElementById('deleteItemId').value = itemId;
+            });
+            
+            const confirmDeleteBtn = document.getElementById('confirmDelete');
+            if (confirmDeleteBtn) {
+                confirmDeleteBtn.addEventListener('click', function() {
+                    const itemId = document.getElementById('deleteItemId').value;
+                    console.log('Deleting item:', itemId);
+                    
+                    // In a real implementation, this would make an API call to delete the item
+                    // For demonstration, just close the modal
+                    const modal = bootstrap.Modal.getInstance(deleteConfirmModal);
+                    modal.hide();
+                });
+            }
+        }
+    });
+</script>
+{% endblock %}
