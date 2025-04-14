@@ -6,14 +6,22 @@ from app.core.config import settings
 async def auth_middleware(request: Request, call_next):
     """
     Middleware xác thực token JWT từ cookie.
-    Chuyển hướng về trang login nếu không có token hoặc token không hợp lệ.
+    Cho phép truy cập các route public
     """
+    # Danh sách các route không yêu cầu xác thực
+    public_routes = ['/login', '/admin-login', '/static', '/test', '/', '']
+    
+    # Bỏ qua xác thực cho các route public
+    if any(request.url.path.startswith(route) for route in public_routes):
+        return await call_next(request)
+    
     try:
         # Lấy token từ cookie
         token = request.cookies.get("access_token")
         
         if not token:
-            # Nếu không có token, chuyển hướng đến trang login
+            # Nếu không có token và không phải route public, chuyển hướng đến login
+            print(f"No token for route: {request.url.path}")
             return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
         
         try:
@@ -29,12 +37,14 @@ async def auth_middleware(request: Request, call_next):
             
         except JWTError:
             # Token không hợp lệ, xóa token khỏi cookie và chuyển hướng đến trang login
+            print(f"Invalid token for route: {request.url.path}")
             response = RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
             response.delete_cookie("access_token")
             return response
             
     except Exception as e:
         # Xử lý các lỗi khác
+        print(f"Authentication error: {str(e)}")
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"detail": f"Authentication error: {str(e)}"}

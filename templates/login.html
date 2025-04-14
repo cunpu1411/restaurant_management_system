@@ -106,39 +106,46 @@
                 
                 console.log('Attempting login for user:', username);
                 
-                // Show the error div for debugging
                 const errorElement = document.getElementById('login-error');
                 if (errorElement) {
-                    errorElement.textContent = 'Đang thực hiện đăng nhập...';
+                    errorElement.textContent = 'Logging in...';
                     errorElement.classList.remove('d-none');
                 }
                 
-                fetch('/api/v1/auth/login/json', {
+                fetch('/login', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    body: JSON.stringify({ username, password }),
+                    body: new URLSearchParams({
+                        username: username,
+                        password: password
+                    }),
                     credentials: 'include'
                 })
                 .then(response => {
                     console.log('Login response status:', response.status);
+                    if (response.status === 302 || response.redirected) {
+                        // Handle redirect
+                        window.location.href = '/dashboard';
+                        return;
+                    }
+                    
                     if (!response.ok) {
-                        return response.json().then(data => {
-                            throw new Error(data.detail || 'Đăng nhập thất bại');
+                        return response.text().then(text => {
+                            throw new Error(text || 'Login failed');
                         });
                     }
                     return response.json();
                 })
                 .then(data => {
                     console.log('Login successful');
-                    // Chuyển hướng đến dashboard
                     window.location.href = '/dashboard';
                 })
                 .catch(error => {
                     console.error('Login error:', error);
                     if (errorElement) {
-                        errorElement.textContent = error.message || 'Đăng nhập thất bại';
+                        errorElement.textContent = error.message || 'Login failed';
                         errorElement.classList.remove('d-none');
                     }
                 });

@@ -55,14 +55,13 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 # Frontend routes
 @app.get("/")
-async def root():
-    # Chuyển hướng đến login
-    print("Redirecting to login page")
-    return RedirectResponse(url="/login")
+async def root(request: Request):
+    print("Root route accessed")
+    return templates.TemplateResponse("login.html", {"request": request})
 
 @app.get("/login")
 async def login_page(request: Request):
-    print("Rendering login page")
+    print("Login page accessed directly")
     return templates.TemplateResponse("login.html", {"request": request})
 
 @app.post("/login")
@@ -97,7 +96,8 @@ async def login_process(request: Request, db: Session = Depends(get_db)):
             key="access_token", 
             value=access_token,
             httponly=True,
-            max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+            max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            samesite="lax"
         )
         
         return response
