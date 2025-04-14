@@ -1,0 +1,89 @@
+/* Custom CSS for Dashboard */
+
+/* Global Styles */
+body {
+    background-color: #f8f9fc;
+  }
+  
+  .card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+  }
+  
+  .card-header {
+    background-color: #fff;
+    border-bottom: 1px solid #e3e6f0;
+  }
+  
+  .card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #4e73df;
+  }
+  
+  /* Stat Cards */
+  .stat-card {
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .stat-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .stat-card .card-body {
+    padding: 1.25rem;
+  }
+  
+  .stat-card .icon {
+    font-size: 2.5rem;
+    color: #dddfeb;
+  }
+  
+  .stat-card .text-primary {
+    color: #4e73df !important;
+  }
+  
+  .stat-card .text-success {
+    color: #1cc88a !important;
+  }
+  
+  .stat-card .text-info {
+    color: #36b9cc !important;
+  }
+  
+  .stat-card .text-warning {
+    color: #f6c23e !important;
+  }
+  
+  /* Recent Orders Table */
+  #recent-orders {
+    font-size: 0.85rem;
+  }
+  
+  #recent-orders th {
+    font-weight: 600;
+  }
+  
+  #recent-orders .badge {
+    font-size: 0.75rem;
+    font-weight: 400;
+    padding: 0.5em 1em;
+  }
+  
+  /* Popular Items */
+  .list-group-item {
+    border: none;
+    padding: 0.75rem 1.25rem;
+  }
+  
+  /* Staff Performance */
+  .progress {
+    height: 10px;
+    border-radius: 10px;
+  }
+  
+  .progress-bar {
+    font-size: 0.65rem;
+    font-weight: 600;
+  }

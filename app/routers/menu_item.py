@@ -1,6 +1,9 @@
 from typing import Any, List, Optional
-
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+import os
+import shutil
+from pathlib import Path
+from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -10,6 +13,11 @@ from app.schemas.menu_item import MenuItem, MenuItemCreate, MenuItemUpdate
 from app.schemas.waitstaff import Waitstaff
 
 router = APIRouter()
+
+# Configure upload directory
+UPLOAD_DIR = Path("app/static/images")
+# Ensure the upload directory exists
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @router.get("/", response_model=List[MenuItem])
 def read_menu_items(
@@ -137,3 +145,54 @@ def toggle_menu_item_availability(
             detail="Menu item not found"
         )
     return menu_item_controller.toggle_availability(db, menu_item_id=menu_item_id)
+
+@router.post("/{menu_item_id}/upload-image", response_model=MenuItem)
+async def upload_menu_item_image(
+    *,
+    db: Session = Depends(get_db),
+    menu_item_id: int,
+    image: UploadFile = File(...),
+    current_user: Waitstaff = Depends(get_current_user)
+) -> Any:
+    """
+    Upload an image for a menu item.
+    """
+    # Only managers can upload images
+    if current_user.role != "Manager":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+    
+    menu_item = menu_item_controller.get_menu_item(db, menu_item_id=menu_item_id)
+    if not menu_item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Menu item not found"
+        )
+    
+    # Check if file is an image
+    if not image.content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File provided is not an image"
+        )
+    
+    # Create a safe filename
+    filename = f"menu_item_{menu_item_id}_{image.filename}"
+    file_path = UPLOAD_DIR / filename
+    
+    # Save the uploaded file
+    with file_path.open("wb") as buffer:
+        shutil.copyfileobj(image.file, buffer)
+    
+    # Update the menu item with the image URL
+    image_url = f"/static/images/{filename}"
+    
+    # Update the menu item in the database
+    menu_item_update = MenuItemUpdate(image_url=image_url)
+    updated_menu_item = menu_item_controller.update_menu_item(
+        db, menu_item_id=menu_item_id, menu_item=menu_item_update
+    )
+    
+    return updated_menu_item

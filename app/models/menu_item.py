@@ -12,6 +12,7 @@ class MenuItem(Base):
     description = Column(Text, nullable=True)
     price = Column(DECIMAL(10, 2), nullable=False)
     is_available = Column(Boolean, default=True)
+    image_url = Column(String(255))
     
     # Relationships
     category = relationship("Category", back_populates="menu_items")

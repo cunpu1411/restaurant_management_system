@@ -13,6 +13,7 @@ class CategoryCreate(CategoryBase):
 # Properties to receive on category update
 class CategoryUpdate(CategoryBase):
     name: Optional[str] = None
+    description: Optional[str] = None
 
 # Properties shared by models stored in DB
 class CategoryInDBBase(CategoryBase):

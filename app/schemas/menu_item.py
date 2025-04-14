@@ -1,7 +1,6 @@
 from typing import Optional, List
 from decimal import Decimal
 from pydantic import BaseModel, Field
-
 from app.schemas.category import Category
 
 # Shared properties
@@ -11,18 +10,20 @@ class MenuItemBase(BaseModel):
     price: Decimal = Field(..., ge=0)
     is_available: bool = True
     category_id: int
+    image_url: Optional[str] = None
 
 # Properties to receive on menu item creation
 class MenuItemCreate(MenuItemBase):
     pass
 
 # Properties to receive on menu item update
-class MenuItemUpdate(MenuItemBase):
+class MenuItemUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     price: Optional[Decimal] = None
     is_available: Optional[bool] = None
     category_id: Optional[int] = None
+    image_url: Optional[str] = None
 
 # Properties shared by models stored in DB
 class MenuItemInDBBase(MenuItemBase):
