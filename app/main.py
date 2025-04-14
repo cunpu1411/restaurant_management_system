@@ -183,15 +183,10 @@ async def menu(request: Request, db: Session = Depends(get_db)):
         user_id = request.state.user_id if hasattr(request.state, "user_id") else None
         print(f"Menu accessed by user_id: {user_id}")
         
-        if not user_id:
-            print("User not authenticated, redirecting to login")
-            return RedirectResponse(url="/login")
-        
-        # Lấy dữ liệu categories và menu items (không cần import lại)
+        # Lấy dữ liệu categories và menu items
         categories = category_controller.get_categories(db)
         menu_items = menu_item_controller.get_menu_items(db)
         
-        # In ra log để debug
         print(f"Categories loaded: {len(categories)}")
         print(f"Menu items loaded: {len(menu_items)}")
         
@@ -205,10 +200,8 @@ async def menu(request: Request, db: Session = Depends(get_db)):
         )
     except Exception as e:
         print(f"Error in menu route: {str(e)}")
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"detail": f"Menu error: {str(e)}"}
-        )
+        # Nếu có lỗi, chuyển hướng về trang login
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
 
 @app.get("/tables")
 async def tables(request: Request):
