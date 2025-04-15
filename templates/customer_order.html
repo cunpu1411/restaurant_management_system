@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+
+{% block title %}Đặt món - Nhà hàng{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-12 text-center">
+            <h2>Đặt món</h2>
+            <p class="text-muted">Vui lòng chọn món ăn và điền thông tin của bạn</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Thực đơn</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Category Tabs -->
+                    <ul class="nav nav-tabs mb-3" id="menuTabs" role="tablist">
+                        {% for category in categories %}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link {% if loop.first %}active{% endif %}" 
+                                    id="category-tab-{{ category.category_id }}" 
+                                    data-bs-toggle="tab" 
+                                    data-bs-target="#category-{{ category.category_id }}" 
+                                    type="button" role="tab">
+                                {{ category.name }}
+                            </button>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="menuTabContent">
+                        {% for category in categories %}
+                        <div class="tab-pane fade {% if loop.first %}show active{% endif %}" 
+                             id="category-{{ category.category_id }}" role="tabpanel">
+                            <div class="row">
+                                {% for item in menu_items %}
+                                {% if item.category_id == category.category_id and item.is_available %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card h-100">
+                                        {% if item.image_url %}
+                                        <img src="{{ item.image_url }}" class="card-img-top" 
+                                             alt="{{ item.name }}" style="height: 150px; object-fit: cover;">
+                                        {% endif %}
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ item.name }}</h5>
+                                            <p class="card-text small">{{ item.description }}</p>
+                                            <p class="fw-bold">${{ item.price }}</p>
+                                            <div class="d-flex align-items-center">
+                                                <button type="button" class="btn btn-sm btn-outline-primary me-2 decrement-btn" 
+                                                        data-item-id="{{ item.menu_item_id }}">
+                                                    <i class="bi bi-dash"></i>
+                                                </button>
+                                                <input type="number" class="form-control form-control-sm text-center item-quantity" 
+                                                       data-item-id="{{ item.menu_item_id }}" 
+                                                       style="width: 60px;" min="0" value="0">
+                                                <button type="button" class="btn btn-sm btn-outline-primary ms-2 increment-btn" 
+                                                        data-item-id="{{ item.menu_item_id }}">
+                                                    <i class="bi bi-plus"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow sticky-top" style="top: 20px;">
+                <div class="card-header">
+                    <h5 class="mb-0">Đơn hàng của bạn</h5>
+                </div>
+                <div class="card-body">
+                    <div id="orderItems">
+                        <!-- Order items will be displayed here -->
+                        <div class="text-center text-muted py-4 empty-cart-message">
+                            <i class="bi bi-cart3 fs-1"></i>
+                            <p>Giỏ hàng trống</p>
+                            <p>Vui lòng chọn món ăn</p>
+                        </div>
+                        <div class="order-items-list d-none">
+                            <!-- Items will be added here via JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <hr class="my-3">
+                    
+                    <div class="d-flex justify-content-between fw-bold mb-3">
+                        <span>Tổng cộng:</span>
+                        <span id="orderTotal">$0.00</span>
+                    </div>
+                    
+                    <form id="customerInfoForm">
+                        <h5 class="mb-3">Thông tin khách hàng</h5>
+                        <div class="mb-3">
+                            <label for="customerName" class="form-label">Họ tên</label>
+                            <input type="text" class="form-control" id="customerName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="customerPhone" class="form-label">Số điện thoại</label>
+                            <input type="tel" class="form-control" id="customerPhone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tableNumber" class="form-label">Số bàn</label>
+                            <select class="form-select" id="tableNumber" required>
+                                <option value="">Chọn bàn</option>
+                                {% for table in tables %}
+                                <option value="{{ table.table_id }}">
+                                    {{ table.table_number }} ({{ table.capacity }} người)
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="specialRequests" class="form-label">Ghi chú đặc biệt</label>
+                            <textarea class="form-control" id="specialRequests" rows="2"></textarea>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary" id="submitOrderBtn" disabled>
+                                Đặt món
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="orderSuccessModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Đặt món thành công!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+                <h4 class="mt-3">Cảm ơn bạn!</h4>
+                <p>Đơn hàng của bạn đã được tiếp nhận.</p>
+                <p>Mã đơn hàng: <span id="orderNumber" class="fw-bold"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include menu data as JSON -->
+<script id="menu-data" type="application/json">
+{
+    "menu_items": [
+        {% for item in menu_items %}
+        {
+            "id": "{{ item.menu_item_id }}",
+            "name": "{{ item.name|escapejs }}",
+            "price": {{ item.price|default(0) }},
+            "description": "{{ item.description|escapejs|default('') }}"
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
+}
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load menu data from JSON
+    var menuData = JSON.parse(document.getElementById('menu-data').textContent);
+    var menuItems = {};
+    
+    // Convert array to object with ID as key
+    menuData.menu_items.forEach(function(item) {
+        menuItems[item.id] = item;
+    });
+    
+    var cart = {};
+    var orderItemsList = document.querySelector('.order-items-list');
+    var emptyCartMessage = document.querySelector('.empty-cart-message');
+    var submitOrderBtn = document.getElementById('submitOrderBtn');
+    
+    // Increment and decrement buttons
+    document.querySelectorAll('.increment-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var itemId = this.getAttribute('data-item-id');
+            var inputField = document.querySelector('.item-quantity[data-item-id="' + itemId + '"]');
+            inputField.value = parseInt(inputField.value) + 1;
+            updateCart(itemId, parseInt(inputField.value));
+        });
+    });
+    
+    document.querySelectorAll('.decrement-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var itemId = this.getAttribute('data-item-id');
+            var inputField = document.querySelector('.item-quantity[data-item-id="' + itemId + '"]');
+            if (parseInt(inputField.value) > 0) {
+                inputField.value = parseInt(inputField.value) - 1;
+                updateCart(itemId, parseInt(inputField.value));
+            }
+        });
+    });
+    
+    document.querySelectorAll('.item-quantity').forEach(function(input) {
+        input.addEventListener('change', function() {
+            var itemId = this.getAttribute('data-item-id');
+            updateCart(itemId, parseInt(this.value));
+        });
+    });
+    
+    function updateCart(itemId, quantity) {
+        if (quantity <= 0) {
+            delete cart[itemId];
+        } else {
+            cart[itemId] = {
+                id: menuItems[itemId].id,
+                name: menuItems[itemId].name,
+                price: menuItems[itemId].price,
+                quantity: quantity
+            };
+        }
+        
+        updateOrderDisplay();
+    }
+    
+    function updateOrderDisplay() {
+        var items = [];
+        for (var key in cart) {
+            if (cart.hasOwnProperty(key)) {
+                items.push(cart[key]);
+            }
+        }
+        
+        var total = 0;
+        
+        if (items.length === 0) {
+            orderItemsList.classList.add('d-none');
+            emptyCartMessage.classList.remove('d-none');
+            submitOrderBtn.disabled = true;
+        } else {
+            orderItemsList.classList.remove('d-none');
+            emptyCartMessage.classList.add('d-none');
+            submitOrderBtn.disabled = false;
+            
+            orderItemsList.innerHTML = '';
+            
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                var itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                
+                var itemElement = document.createElement('div');
+                itemElement.className = 'mb-2';
+                itemElement.innerHTML = 
+                    '<div class="d-flex justify-content-between">' +
+                        '<div>' +
+                            '<span class="fw-bold">' + item.quantity + 'x</span> ' + item.name +
+                        '</div>' +
+                        '<div>$' + itemTotal.toFixed(2) + '</div>' +
+                    '</div>';
+                orderItemsList.appendChild(itemElement);
+            }
+        }
+        
+        document.getElementById('orderTotal').textContent = '$' + total.toFixed(2);
+    }
+    
+    // Form submission
+    document.getElementById('customerInfoForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (Object.keys(cart).length === 0) {
+            alert('Vui lòng chọn ít nhất một món ăn');
+            return;
+        }
+        
+        var customerName = document.getElementById('customerName').value;
+        var customerPhone = document.getElementById('customerPhone').value;
+        var tableId = document.getElementById('tableNumber').value;
+        var specialRequests = document.getElementById('specialRequests').value;
+        
+        var orderItems = [];
+        for (var key in cart) {
+            if (cart.hasOwnProperty(key)) {
+                var item = cart[key];
+                orderItems.push({
+                    menu_item_id: item.id,
+                    quantity: item.quantity,
+                    special_request: specialRequests
+                });
+            }
+        }
+        
+        var orderData = {
+            customer: {
+                name: customerName,
+                contact_number: customerPhone
+            },
+            table_id: parseInt(tableId),
+            order_items: orderItems
+        };
+        
+        // Submit order
+        fetch('/api/v1/customer/orders', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(orderData)
+        })
+        .then(function(response) {
+            if (!response.ok) {
+                return response.json().then(function(data) {
+                    throw new Error(data.detail || 'Có lỗi xảy ra');
+                });
+            }
+            return response.json();
+        })
+        .then(function(data) {
+            // Show success modal
+            document.getElementById('orderNumber').textContent = data.order_id;
+            var successModal = new bootstrap.Modal(document.getElementById('orderSuccessModal'));
+            successModal.show();
+            
+            // Reset form and cart
+            resetForm();
+        })
+        .catch(function(error) {
+            alert('Lỗi: ' + error.message);
+        });
+    });
+    
+    function resetForm() {
+        document.getElementById('customerInfoForm').reset();
+        cart = {};
+        document.querySelectorAll('.item-quantity').forEach(function(input) {
+            input.value = 0;
+        });
+        updateOrderDisplay();
+    }
+});
+</script>
+{% endblock %}

@@ -12,9 +12,16 @@ from app.middleware.auth import auth_middleware
 from app.core.database import get_db
 from app.controllers import waitstaff as waitstaff_controller
 from app.controllers import menu_item as menu_item_controller
+from app.controllers import table as table_controller
 from app.controllers import category as category_controller
+from app.controllers import order as order_controller
+from app.schemas.customer import CustomerCreate
+from app.schemas.order import OrderCreate
+from app.schemas.order import OrderItemCreate
 from app.core.security import create_access_token
 from app.models.waitstaff import Waitstaff
+
+import os
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -48,7 +55,25 @@ async def add_auth_middleware(request: Request, call_next):
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 # Set up templates
-templates = Jinja2Templates(directory="templates")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Nếu main.py nằm trong app/
+templates_dir = os.path.join(BASE_DIR, "templates")
+templates = Jinja2Templates(directory=templates_dir)
+
+def escapejs_filter(value):
+    """Escape chuỗi giá trị để an toàn với JavaScript"""
+    if value is None:
+        return ""
+    value = str(value)
+    value = value.replace('\\', '\\\\')
+    value = value.replace('"', '\\"')
+    value = value.replace("'", "\\'")
+    value = value.replace('\n', '\\n')
+    value = value.replace('\r', '\\r')
+    value = value.replace('\t', '\\t')
+    return value
+
+# Đăng ký filter với Jinja2
+templates.env.filters["escapejs"] = escapejs_filter
 
 # Include API router
 app.include_router(api_router, prefix=settings.API_V1_STR)
@@ -200,8 +225,14 @@ async def menu(request: Request, db: Session = Depends(get_db)):
         )
     except Exception as e:
         print(f"Error in menu route: {str(e)}")
-        # Nếu có lỗi, chuyển hướng về trang login
-        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+        # Thay vì chuyển hướng, hiển thị trang lỗi
+        return templates.TemplateResponse(
+            "error.html", 
+            {
+                "request": request,
+                "error": str(e)
+            }
+        )
 
 @app.get("/tables")
 async def tables(request: Request):
@@ -229,6 +260,101 @@ async def customers(request: Request):
 @app.get("/test")
 async def test():
     return {"message": "API is working!"}
+
+# Thêm route cho trang đặt món của khách hàng
+@app.get("/order")
+async def customer_order_page(request: Request, db: Session = Depends(get_db)):
+    """
+    Trang công khai cho khách hàng đặt món không cần đăng nhập
+    """
+    try:
+        # Lấy dữ liệu categories và menu items
+        categories = category_controller.get_categories(db)
+        menu_items = menu_item_controller.get_available_menu_items(db)
+        tables = table_controller.get_tables(db)
+        
+        print("Rendering customer order page")
+        print(f"Categories loaded: {len(categories)}")
+        print(f"Available menu items loaded: {len(menu_items)}")
+        print(f"Tables loaded: {len(tables)}")
+        
+        return templates.TemplateResponse(
+            "customer_order.html", 
+            {
+                "request": request,
+                "categories": categories,
+                "menu_items": menu_items,
+                "tables": tables
+            }
+        )
+    except Exception as e:
+        print(f"Error in customer order page: {str(e)}")
+        return templates.TemplateResponse(
+            "error.html", 
+            {
+                "request": request,
+                "error": str(e)
+            }
+        )
+
+# Thêm API endpoint để xử lý đơn hàng từ khách hàng
+@app.post("/api/v1/customer/orders")
+async def create_customer_order(
+    order_data: dict,
+    db: Session = Depends(get_db)
+):
+    """
+    API để xử lý đơn hàng từ trang đặt món của khách hàng
+    """
+    try:
+        print("Processing customer order")
+        print(f"Order data: {order_data}")
+        
+        # Xử lý thông tin khách hàng
+        customer_data = CustomerCreate(
+            name=order_data.get("customer", {}).get("name", ""),
+            contact_number=order_data.get("customer", {}).get("contact_number", "")
+        )
+        
+        # Tìm hoặc tạo mới khách hàng
+        customer = waitstaff_controller.get_or_create_customer(db, customer=customer_data)
+        
+        # Xây dựng order items
+        order_items = []
+        for item in order_data.get("order_items", []):
+            order_item = OrderItemCreate(
+                menu_item_id=item.get("menu_item_id"),
+                quantity=item.get("quantity", 1),
+                special_request=item.get("special_request", ""),
+                status="pending"
+            )
+            order_items.append(order_item)
+        
+        # Tạo order mới
+        order_create = OrderCreate(
+            customer_id=customer.customer_id,
+            table_id=order_data.get("table_id"),
+            status="pending",
+            order_items=order_items
+        )
+        
+        # Tạo đơn hàng mới
+        new_order = order_controller.create_order(db, order=order_create)
+        
+        print(f"Order created successfully with ID: {new_order.order_id}")
+        
+        return {
+            "status": "success",
+            "message": "Đơn hàng đã được tạo thành công",
+            "order_id": new_order.order_id
+        }
+        
+    except Exception as e:
+        print(f"Error creating customer order: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"detail": f"Lỗi khi tạo đơn hàng: {str(e)}"}
+        )
 
 if __name__ == "__main__":
     import uvicorn

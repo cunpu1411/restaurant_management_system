@@ -2,7 +2,7 @@ from typing import Any, List, Optional
 import os
 import shutil
 from pathlib import Path
-from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File, Request
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
@@ -40,25 +40,6 @@ def read_menu_items(
         )
     return menu_items
 
-@router.post("/", response_model=MenuItem)
-def create_menu_item(
-    *,
-    db: Session = Depends(get_db),
-    menu_item_in: MenuItemCreate,
-    current_user: Waitstaff = Depends(get_current_user)
-) -> Any:
-    """
-    Create new menu item.
-    """
-    # Only managers can create menu items
-    if current_user.role != "Manager":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions"
-        )
-        
-    return menu_item_controller.create_menu_item(db, menu_item=menu_item_in)
-
 @router.get("/{menu_item_id}", response_model=MenuItem)
 def read_menu_item(
     *,
@@ -76,18 +57,51 @@ def read_menu_item(
         )
     return menu_item
 
+@router.post("/", response_model=MenuItem)
+def create_menu_item(
+    request: Request,
+    *,
+    db: Session = Depends(get_db),
+    menu_item_in: MenuItemCreate,
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
+) -> Any:
+    """
+    Create new menu item.
+    """
+    # Check if user is authenticated and has Manager role
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+    
+    if current_user.role != "Manager":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+        
+    return menu_item_controller.create_menu_item(db, menu_item=menu_item_in)
+
 @router.put("/{menu_item_id}", response_model=MenuItem)
 def update_menu_item(
+    request: Request,
     *,
     db: Session = Depends(get_db),
     menu_item_id: int,
     menu_item_in: MenuItemUpdate,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Update a menu item.
     """
-    # Only managers can update menu items
+    # Check if user is authenticated and has Manager role
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+    
     if current_user.role != "Manager":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -104,15 +118,22 @@ def update_menu_item(
 
 @router.delete("/{menu_item_id}", response_model=MenuItem)
 def delete_menu_item(
+    request: Request,
     *,
     db: Session = Depends(get_db),
     menu_item_id: int,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Delete a menu item.
     """
-    # Only managers can delete menu items
+    # Check if user is authenticated and has Manager role
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+    
     if current_user.role != "Manager":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -129,14 +150,22 @@ def delete_menu_item(
 
 @router.put("/{menu_item_id}/toggle-availability", response_model=MenuItem)
 def toggle_menu_item_availability(
+    request: Request,
     *,
     db: Session = Depends(get_db),
     menu_item_id: int,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Toggle the availability of a menu item.
     """
+    # Check if user is authenticated
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+    
     # Waiters and managers can toggle availability
     menu_item = menu_item_controller.get_menu_item(db, menu_item_id=menu_item_id)
     if not menu_item:
@@ -148,16 +177,23 @@ def toggle_menu_item_availability(
 
 @router.post("/{menu_item_id}/upload-image", response_model=MenuItem)
 async def upload_menu_item_image(
+    request: Request,
     *,
     db: Session = Depends(get_db),
     menu_item_id: int,
     image: UploadFile = File(...),
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Upload an image for a menu item.
     """
-    # Only managers can upload images
+    # Check if user is authenticated and has Manager role
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+    
     if current_user.role != "Manager":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

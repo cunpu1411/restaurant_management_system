@@ -38,6 +38,8 @@ if (loginForm) {
         })
         .then(data => {
             console.log('Login successful');
+            // Lưu token vào localStorage (optional)
+            localStorage.setItem('auth_token', data.access_token);
             // Trực tiếp chuyển hướng đến dashboard
             window.location.href = '/dashboard';
         })
@@ -55,15 +57,35 @@ if (loginForm) {
 
 // Menu Management Functions
 document.addEventListener('DOMContentLoaded', function() {
-    // Check if we're on the menu management page
-    const menuManagementPage = document.querySelector('.container h1');
+    // Check if we're on the menu management page by looking for the menu management heading
+    const menuManagementPage = document.querySelector('h1');
     if (menuManagementPage && menuManagementPage.textContent.includes('Menu Management')) {
         console.log('Menu Management page detected, initializing functions');
-        initializeMenuFunctions();
+        
+        // Ensure Bootstrap is loaded before initializing
+        if (typeof bootstrap === 'undefined') {
+            console.error('Bootstrap is not loaded. Modal functions will not work.');
+            // Try to load Bootstrap dynamically if not already loaded
+            const bootstrapScript = document.createElement('script');
+            bootstrapScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js';
+            bootstrapScript.onload = function() {
+                console.log('Bootstrap loaded dynamically, initializing menu functions');
+                initializeMenuFunctions();
+            };
+            bootstrapScript.onerror = function() {
+                console.error('Failed to load Bootstrap dynamically');
+                alert('Could not load required scripts. Please refresh the page and try again.');
+            };
+            document.head.appendChild(bootstrapScript);
+        } else {
+            // Bootstrap is already loaded, proceed with initialization
+            initializeMenuFunctions();
+        }
     }
 });
 
 function initializeMenuFunctions() {
+    console.log('Initializing menu functions - v1.0.2');
     try {
         // Setup modal for Add Menu Item button
         const addMenuItemButton = document.getElementById('addMenuItemButton');
@@ -79,27 +101,37 @@ function initializeMenuFunctions() {
                     alert('Could not open add form. Please try again.');
                 }
             });
+        } else {
+            console.warn('Add button not found');
         }
         
         // Set up event listeners
         const filterButton = document.getElementById('filterButton');
         if(filterButton) {
             filterButton.addEventListener('click', filterByCategory);
+        } else {
+            console.warn('Filter button not found');
         }
         
         const addItemBtn = document.getElementById('addItemBtn');
         if(addItemBtn) {
             addItemBtn.addEventListener('click', addMenuItem);
+        } else {
+            console.warn('Add item button not found');
         }
         
         const updateItemBtn = document.getElementById('updateItemBtn');
         if(updateItemBtn) {
             updateItemBtn.addEventListener('click', updateMenuItem);
+        } else {
+            console.warn('Update item button not found');
         }
         
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
         if(confirmDeleteBtn) {
             confirmDeleteBtn.addEventListener('click', confirmDelete);
+        } else {
+            console.warn('Confirm delete button not found');
         }
         
         // Setup event listeners for edit buttons
@@ -199,13 +231,21 @@ async function addMenuItem() {
         
         console.log('Form data converted to JSON:', jsonData);
         
+        // Get auth token from localStorage (if available)
+        const token = localStorage.getItem('auth_token');
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+        
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
         // First create the menu item
         console.log('Sending POST request to create menu item');
         const response = await fetch('/api/v1/menu-items/', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: headers,
             body: JSON.stringify(jsonData),
             credentials: 'include'
         });
@@ -234,14 +274,23 @@ async function addMenuItem() {
             const imageFormData = new FormData();
             imageFormData.append('image', imageFile);
             
+            // Add auth token to header if available
+            const imageHeaders = {};
+            if (token) {
+                imageHeaders['Authorization'] = `Bearer ${token}`;
+            }
+            
             const uploadResponse = await fetch(`/api/v1/menu-items/${menuItem.menu_item_id}/upload-image`, {
                 method: 'POST',
+                headers: imageHeaders,
                 body: imageFormData,
                 credentials: 'include'
             });
             
             if (!uploadResponse.ok) {
                 console.error('Failed to upload image');
+                const errorData = await uploadResponse.json().catch(e => ({}));
+                console.error('Upload error details:', errorData);
             } else {
                 console.log('Image uploaded successfully');
             }
@@ -272,8 +321,16 @@ async function editMenuItem(itemId) {
         const errorAlert = document.getElementById('editErrorAlert');
         errorAlert.classList.add('d-none');
         
+        // Get token from localStorage if available
+        const token = localStorage.getItem('auth_token');
+        const headers = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
         console.log(`Fetching menu item ${itemId} details`);
         const response = await fetch(`/api/v1/menu-items/${itemId}`, {
+            headers: headers,
             credentials: 'include'
         });
         
@@ -349,13 +406,20 @@ async function updateMenuItem() {
         
         console.log('Form data converted to JSON:', jsonData);
         
+        // Get token from localStorage if available
+        const token = localStorage.getItem('auth_token');
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
         // Update the menu item
         console.log(`Sending PUT request to update menu item ${itemId}`);
         const response = await fetch(`/api/v1/menu-items/${itemId}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: headers,
             body: JSON.stringify(jsonData),
             credentials: 'include'
         });
@@ -383,14 +447,22 @@ async function updateMenuItem() {
             const imageFormData = new FormData();
             imageFormData.append('image', imageFile);
             
+            const imageHeaders = {};
+            if (token) {
+                imageHeaders['Authorization'] = `Bearer ${token}`;
+            }
+            
             const uploadResponse = await fetch(`/api/v1/menu-items/${itemId}/upload-image`, {
                 method: 'POST',
+                headers: imageHeaders,
                 body: imageFormData,
                 credentials: 'include'
             });
             
             if (!uploadResponse.ok) {
                 console.error('Failed to upload image');
+                const errorData = await uploadResponse.json().catch(e => ({}));
+                console.error('Upload error details:', errorData);
             } else {
                 console.log('Image uploaded successfully');
             }
@@ -418,9 +490,17 @@ async function updateMenuItem() {
 async function toggleAvailability(itemId) {
     console.log(`Toggling availability for menu item ${itemId}`);
     try {
+        // Get token from localStorage if available
+        const token = localStorage.getItem('auth_token');
+        const headers = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
         console.log(`Sending PUT request to toggle menu item ${itemId}`);
         const response = await fetch(`/api/v1/menu-items/${itemId}/toggle-availability`, {
             method: 'PUT',
+            headers: headers,
             credentials: 'include'
         });
         
@@ -441,56 +521,5 @@ async function toggleAvailability(itemId) {
     } catch (error) {
         console.error('Error toggling availability:', error);
         alert('Failed to update item availability. Please try again.');
-    }
-}
-
-// Delete menu item - show confirmation dialog
-function deleteMenuItem(itemId, itemName) {
-    console.log(`Showing delete confirmation for menu item ${itemId}`);
-    document.getElementById('deleteItemId').value = itemId;
-    
-    // Display item name in confirmation modal if available
-    const nameElement = document.getElementById('deleteItemName');
-    if (nameElement && itemName) {
-        nameElement.textContent = 'Item: ' + itemName;
-    }
-    
-    const deleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
-    deleteModal.show();
-}
-
-// Confirm delete
-async function confirmDelete() {
-    const itemId = document.getElementById('deleteItemId').value;
-    console.log(`Confirming delete for menu item ${itemId}`);
-    
-    try {
-        console.log(`Sending DELETE request for menu item ${itemId}`);
-        const response = await fetch(`/api/v1/menu-items/${itemId}`, {
-            method: 'DELETE',
-            credentials: 'include'
-        });
-        
-        console.log('Response status:', response.status);
-        
-        if (!response.ok) {
-            throw new Error('Failed to delete menu item');
-        }
-        
-        console.log('Menu item deleted successfully');
-        
-        // Close the modal
-        const deleteModal = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'));
-        deleteModal.hide();
-        
-        // Show success message
-        alert('Menu item deleted successfully!');
-        
-        // Refresh the page
-        window.location.reload();
-        
-    } catch (error) {
-        console.error('Error deleting menu item:', error);
-        alert('Failed to delete menu item. Please try again.');
     }
 }
