@@ -15,6 +15,7 @@ from app.controllers import menu_item as menu_item_controller
 from app.controllers import table as table_controller
 from app.controllers import category as category_controller
 from app.controllers import order as order_controller
+from app.controllers import customer as customer_controller
 from app.schemas.customer import CustomerCreate
 from app.schemas.order import OrderCreate
 from app.schemas.order import OrderItemCreate
@@ -317,7 +318,7 @@ async def create_customer_order(
         )
         
         # Tìm hoặc tạo mới khách hàng
-        customer = waitstaff_controller.get_or_create_customer(db, customer=customer_data)
+        customer = customer_controller.get_or_create_customer(db, customer=customer_data)
         
         # Xây dựng order items
         order_items = []
