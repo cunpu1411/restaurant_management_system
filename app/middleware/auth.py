@@ -29,7 +29,8 @@ async def auth_middleware(request: Request, call_next):
     public_api_routes = [
         '/api/v1/menu-items',
         '/api/v1/categories',
-        '/api/v1/customer/orders'
+        '/api/v1/customer/orders',
+        '/api/v1/dashboard/stats'
     ]
     
     # Routes that should be accessible after login

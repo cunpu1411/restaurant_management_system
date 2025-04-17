@@ -8,6 +8,7 @@ from datetime import timedelta
 
 from app.core.config import settings
 from app.routers import api_router
+from app.routers import __init__
 from app.middleware.auth import auth_middleware
 from app.core.database import get_db
 from app.controllers import waitstaff as waitstaff_controller
@@ -176,12 +177,16 @@ async def admin_login(response: Response, db: Session = Depends(get_db)):
         )
 
 @app.get("/dashboard")
-async def dashboard(request: Request):
+async def dashboard(request: Request, db: Session = Depends(get_db)):
     try:
         # Lấy thông tin user từ token
         user_id = request.state.user_id if hasattr(request.state, "user_id") else None
         print(f"Dashboard accessed by user_id: {user_id}")
-        return templates.TemplateResponse("dashboard.html", {"request": request})
+        
+        return templates.TemplateResponse("dashboard.html", {
+            "request": request,
+            "user_id": user_id
+        })
     except Exception as e:
         print(f"Error in dashboard: {str(e)}")
         return JSONResponse(

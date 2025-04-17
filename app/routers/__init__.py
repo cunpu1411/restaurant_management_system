@@ -11,6 +11,7 @@ from app.routers import (
     payment,
     feedback,
     auth,
+    dashboard,  # Thêm dashboard module vào đây
 )
 
 api_router = APIRouter()
@@ -24,3 +25,4 @@ api_router.include_router(order.router, prefix="/orders", tags=["Orders"])
 api_router.include_router(order_item.router, prefix="/order-items", tags=["Order Items"])
 api_router.include_router(payment.router, prefix="/payments", tags=["Payments"])
 api_router.include_router(feedback.router, prefix="/feedback", tags=["Feedback"])
+api_router.include_router(dashboard.router, prefix="/dashboard", tags=["Dashboard"])  # Thêm dashboard router
