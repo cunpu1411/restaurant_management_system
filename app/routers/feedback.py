@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -17,7 +17,7 @@ def read_feedbacks(
     skip: int = 0, 
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Retrieve feedbacks.
@@ -35,7 +35,7 @@ def read_feedbacks(
 @router.get("/statistics")
 def get_feedback_statistics(
     db: Session = Depends(get_db),
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Get feedback statistics.
@@ -47,7 +47,7 @@ def get_feedback_statistics(
 def read_feedbacks_by_order(
     order_id: int,
     db: Session = Depends(get_db),
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Retrieve feedbacks for a specific order.
@@ -95,7 +95,7 @@ def read_feedback(
     *,
     db: Session = Depends(get_db),
     feedback_id: int,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Get feedback by ID.
@@ -114,7 +114,7 @@ def update_feedback(
     db: Session = Depends(get_db),
     feedback_id: int,
     feedback_in: FeedbackUpdate,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Update a feedback. Only managers can update feedback.
@@ -147,7 +147,7 @@ def delete_feedback(
     *,
     db: Session = Depends(get_db),
     feedback_id: int,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Delete a feedback. Only managers can delete feedback.

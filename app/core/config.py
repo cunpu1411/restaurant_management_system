@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Restaurant Management System"
     
     # Database settings
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "mysql+pymysql://root:password@localhost/restaurant_management")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "mysql+pymysql://root:Tung%4015436902@localhost/restaurant_management")
     
     # Security settings
     SECRET_KEY: str = os.getenv("SECRET_KEY", secrets.token_hex(32))

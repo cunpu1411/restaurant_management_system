@@ -18,35 +18,6 @@
     .order-summary {
         font-size: 0.9rem;
     }
-    .timeline-item {
-        position: relative;
-        padding-left: 30px;
-        margin-bottom: 15px;
-    }
-    .timeline-item:before {
-        content: '';
-        display: block;
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 15px;
-        height: 15px;
-        border-radius: 50%;
-        background-color: #007bff;
-    }
-    .timeline-item:after {
-        content: '';
-        display: block;
-        position: absolute;
-        left: 7px;
-        top: 15px;
-        width: 2px;
-        height: calc(100% + 5px);
-        background-color: #dee2e6;
-    }
-    .timeline-item:last-child:after {
-        display: none;
-    }
 </style>
 {% endblock %}
 
@@ -74,30 +45,6 @@
         </div>
     </div>
 
-    <!-- Order Tabs -->
-    <ul class="nav nav-tabs mb-4" id="orderTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="all-orders-tab" data-bs-toggle="tab" data-bs-target="#all-orders" type="button" role="tab" aria-controls="all-orders" aria-selected="true">
-                All Orders <span class="badge bg-secondary">12</span>
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" aria-controls="pending" aria-selected="false">
-                Pending <span class="badge bg-warning">3</span>
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="processing-tab" data-bs-toggle="tab" data-bs-target="#processing" type="button" role="tab" aria-controls="processing" aria-selected="false">
-                Processing <span class="badge bg-info">4</span>
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab" aria-controls="completed" aria-selected="false">
-                Completed <span class="badge bg-success">5</span>
-            </button>
-        </li>
-    </ul>
-
     <!-- Search and Date Filter -->
     <div class="card shadow mb-4">
         <div class="card-body">
@@ -117,209 +64,37 @@
                     </div>
                 </div>
                 <div class="col-md-2">
-                    <button type="button" class="btn btn-outline-primary w-100">Apply Filter</button>
+                    <button type="button" class="btn btn-outline-primary w-100" id="applyFilterBtn">Apply Filter</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Orders Tab Content -->
-    <div class="tab-content" id="orderTabsContent">
-        <!-- All Orders Tab -->
-        <div class="tab-pane fade show active" id="all-orders" role="tabpanel" aria-labelledby="all-orders-tab">
-            <div class="row">
-                <!-- Order Card 1 -->
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="card order-card shadow-sm">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0"><a href="/orders/1001">#1001</a></h5>
-                            <span class="badge bg-warning status-badge">Processing</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <div class="mb-1"><strong>Table:</strong> Table 4</div>
-                                <div class="mb-1"><strong>Waiter:</strong> John Smith</div>
-                                <div><strong>Time:</strong> <span class="text-muted">Today, 10:45 AM</span></div>
-                            </div>
-                            <div class="order-summary mb-3">
-                                <div><strong>Items:</strong></div>
-                                <ul class="list-unstyled ms-3 mb-0">
-                                    <li>1 × Grilled Salmon</li>
-                                    <li>2 × Fresh Orange Juice</li>
-                                    <li>1 × Chocolate Cake</li>
-                                </ul>
-                            </div>
-                            <div class="text-end mb-3">
-                                <strong>Total:</strong> <span class="fs-5">$45.80</span>
-                            </div>
-                            <div class="d-grid gap-2">
-                                <a href="/orders/1001" class="btn btn-outline-primary">View Details</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Order Card 2 -->
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="card order-card shadow-sm">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0"><a href="/orders/1002">#1002</a></h5>
-                            <span class="badge bg-success status-badge">Completed</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <div class="mb-1"><strong>Table:</strong> Table 2</div>
-                                <div class="mb-1"><strong>Waiter:</strong> Maria Johnson</div>
-                                <div><strong>Time:</strong> <span class="text-muted">Today, 11:20 AM</span></div>
-                            </div>
-                            <div class="order-summary mb-3">
-                                <div><strong>Items:</strong></div>
-                                <ul class="list-unstyled ms-3 mb-0">
-                                    <li>2 × Beef Steak</li>
-                                    <li>1 × Cheese Platter</li>
-                                    <li>2 × Fresh Orange Juice</li>
-                                </ul>
-                            </div>
-                            <div class="text-end mb-3">
-                                <strong>Total:</strong> <span class="fs-5">$78.25</span>
-                            </div>
-                            <div class="d-grid gap-2">
-                                <a href="/orders/1002" class="btn btn-outline-primary">View Details</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Order Card 3 -->
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="card order-card shadow-sm">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0"><a href="/orders/1003">#1003</a></h5>
-                            <span class="badge bg-info status-badge">Pending</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <div class="mb-1"><strong>Table:</strong> Table 7</div>
-                                <div class="mb-1"><strong>Waiter:</strong> Robert Davis</div>
-                                <div><strong>Time:</strong> <span class="text-muted">Today, 12:15 PM</span></div>
-                            </div>
-                            <div class="order-summary mb-3">
-                                <div><strong>Items:</strong></div>
-                                <ul class="list-unstyled ms-3 mb-0">
-                                    <li>1 × Grilled Salmon</li>
-                                    <li>1 × Fresh Orange Juice</li>
-                                </ul>
-                            </div>
-                            <div class="text-end mb-3">
-                                <strong>Total:</strong> <span class="fs-5">$28.50</span>
-                            </div>
-                            <div class="d-grid gap-2">
-                                <a href="/orders/1003" class="btn btn-outline-primary">View Details</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Order Card 4 -->
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="card order-card shadow-sm">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0"><a href="/orders/1004">#1004</a></h5>
-                            <span class="badge bg-success status-badge">Completed</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <div class="mb-1"><strong>Table:</strong> Table 1</div>
-                                <div class="mb-1"><strong>Waiter:</strong> Sarah Brown</div>
-                                <div><strong>Time:</strong> <span class="text-muted">Today, 12:30 PM</span></div>
-                            </div>
-                            <div class="order-summary mb-3">
-                                <div><strong>Items:</strong></div>
-                                <ul class="list-unstyled ms-3 mb-0">
-                                    <li>1 × Beef Steak</li>
-                                    <li>1 × Cheese Platter</li>
-                                    <li>1 × Chocolate Cake</li>
-                                    <li>1 × Fresh Orange Juice</li>
-                                </ul>
-                            </div>
-                            <div class="text-end mb-3">
-                                <strong>Total:</strong> <span class="fs-5">$52.30</span>
-                            </div>
-                            <div class="d-grid gap-2">
-                                <a href="/orders/1004" class="btn btn-outline-primary">View Details</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Order Card 5 -->
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="card order-card shadow-sm">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0"><a href="/orders/1005">#1005</a></h5>
-                            <span class="badge bg-danger status-badge">Cancelled</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <div class="mb-1"><strong>Table:</strong> Table 3</div>
-                                <div class="mb-1"><strong>Waiter:</strong> Michael Wilson</div>
-                                <div><strong>Time:</strong> <span class="text-muted">Today, 1:15 PM</span></div>
-                            </div>
-                            <div class="order-summary mb-3">
-                                <div><strong>Items:</strong></div>
-                                <ul class="list-unstyled ms-3 mb-0">
-                                    <li>1 × Chocolate Cake</li>
-                                </ul>
-                            </div>
-                            <div class="text-end mb-3">
-                                <strong>Total:</strong> <span class="fs-5">$12.99</span>
-                            </div>
-                            <div class="d-grid gap-2">
-                                <a href="/orders/1005" class="btn btn-outline-primary">View Details</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <!-- Orders List -->
+    <div class="row" id="ordersContainer">
+        <!-- Order cards will be loaded here -->
+        <div class="col-12 text-center py-5" id="ordersLoading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
             </div>
-
-            <!-- Pagination -->
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
-                    </li>
-                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">Next</a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-
-        <!-- Other Tabs (Pending, Processing, Completed) would have similar content -->
-        <div class="tab-pane fade" id="pending" role="tabpanel" aria-labelledby="pending-tab">
-            <!-- Similar content as All Orders but filtered for Pending status -->
-            <div class="text-center text-muted py-5">
-                <p>Pending orders will be displayed here.</p>
-            </div>
-        </div>
-        
-        <div class="tab-pane fade" id="processing" role="tabpanel" aria-labelledby="processing-tab">
-            <!-- Similar content as All Orders but filtered for Processing status -->
-            <div class="text-center text-muted py-5">
-                <p>Processing orders will be displayed here.</p>
-            </div>
-        </div>
-        
-        <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
-            <!-- Similar content as All Orders but filtered for Completed status -->
-            <div class="text-center text-muted py-5">
-                <p>Completed orders will be displayed here.</p>
-            </div>
+            <p class="mt-2">Loading orders...</p>
         </div>
     </div>
+
+    <!-- Pagination -->
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center" id="ordersPagination">
+            <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1">Previous</a>
+            </li>
+            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item">
+                <a class="page-link" href="#">Next</a>
+            </li>
+        </ul>
+    </nav>
 </div>
 
 <!-- New Order Modal -->
@@ -337,16 +112,7 @@
                             <label for="orderTable" class="form-label">Table</label>
                             <select class="form-select" id="orderTable" required>
                                 <option value="">Select a table</option>
-                                <option value="1">Table 1</option>
-                                <option value="2">Table 2</option>
-                                <option value="3">Table 3</option>
-                                <option value="4">Table 4</option>
-                                <option value="5">Table 5</option>
-                                <option value="6">Table 6</option>
-                                <option value="7">Table 7</option>
-                                <option value="8">Table 8</option>
-                                <option value="9">Table 9</option>
-                                <option value="10">Table 10</option>
+                                <!-- Tables will be loaded dynamically -->
                             </select>
                             <div class="invalid-feedback">Please select a table.</div>
                         </div>
@@ -354,11 +120,7 @@
                             <label for="orderWaiter" class="form-label">Waiter</label>
                             <select class="form-select" id="orderWaiter" required>
                                 <option value="">Select a waiter</option>
-                                <option value="1">John Smith</option>
-                                <option value="2">Maria Johnson</option>
-                                <option value="3">Robert Davis</option>
-                                <option value="4">Sarah Brown</option>
-                                <option value="5">Michael Wilson</option>
+                                <!-- Waiters will be loaded dynamically -->
                             </select>
                             <div class="invalid-feedback">Please select a waiter.</div>
                         </div>
@@ -370,9 +132,7 @@
                             <div class="input-group">
                                 <select class="form-select" id="orderCustomer">
                                     <option value="">Select a customer</option>
-                                    <option value="1">John Doe</option>
-                                    <option value="2">Jane Smith</option>
-                                    <option value="3">Robert Johnson</option>
+                                    <!-- Customers will be loaded dynamically -->
                                 </select>
                                 <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#newCustomerForm">
                                     <i class="bi bi-plus"></i> New
@@ -403,99 +163,15 @@
                         <div class="row mb-3 align-items-end order-item">
                             <div class="col-md-5">
                                 <label for="item1" class="form-label">Item</label>
-                                <select class="form-select" id="item1" required>
+                                <select class="form-select item-select" id="item1" required>
                                     <option value="">Select an item</option>
-                                    <option value="1">Grilled Salmon - $18.99</option>
-                                    <option value="2">Beef Steak - $22.99</option>
-                                    <option value="3">Cheese Platter - $10.99</option>
-                                    <option value="4">Chocolate Cake - $7.99</option>
-                                    <option value="5">Fresh Orange Juice - $4.99</option>
-                        </select>
-                        <div class="invalid-feedback">Please select an item.</div>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="quantity${itemCount}" class="form-label">Quantity</label>
-                        <input type="number" class="form-control" id="quantity${itemCount}" min="1" value="1" required>
-                        <div class="invalid-feedback">Quantity must be at least 1.</div>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="specialRequest${itemCount}" class="form-label">Special Request</label>
-                        <input type="text" class="form-control" id="specialRequest${itemCount}" placeholder="Optional">
-                    </div>
-                    <div class="col-md-1">
-                        <button type="button" class="btn btn-outline-danger remove-item">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </div>
-                `;
-                
-                orderItems.appendChild(newItem);
-                
-                // Add event listener to new remove button
-                const removeButtons = document.querySelectorAll('.remove-item');
-                removeButtons.forEach(button => {
-                    button.addEventListener('click', function() {
-                        if (document.querySelectorAll('.order-item').length > 1) {
-                            this.closest('.order-item').remove();
-                            updateOrderTotal();
-                        }
-                    });
-                });
-            });
-        }
-        
-        // Calculate order total
-        function updateOrderTotal() {
-            // In a real implementation, this would calculate the actual total based on selected items
-            document.getElementById('orderTotal').textContent = '$45.80';
-        }
-        
-        // Show order detail modal when clicking "View Details"
-        const viewDetailLinks = document.querySelectorAll('a[href^="/orders/"]');
-        viewDetailLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const orderId = this.getAttribute('href').split('/').pop();
-                
-                // Update modal title with order ID
-                document.getElementById('orderDetailModalLabel').textContent = `Order #${orderId} Details`;
-                
-                // Show the modal
-                const orderDetailModal = new bootstrap.Modal(document.getElementById('orderDetailModal'));
-                orderDetailModal.show();
-            });
-        });
-        
-        // Form validation
-        const forms = document.querySelectorAll('.needs-validation');
-        Array.from(forms).forEach(form => {
-            form.addEventListener('submit', event => {
-                if (!form.checkValidity()) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                } else {
-                    // For demo purposes, prevent actual form submission
-                    event.preventDefault();
-                    
-                    // Show success message or redirect in a real implementation
-                    if (form.id === 'newOrderForm') {
-                        alert('Order created successfully!');
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('newOrderModal'));
-                        modal.hide();
-                    }
-                }
-                form.classList.add('was-validated');
-            }, false);
-        });
-    });
-</script>
-{% endblock %}
+                                    <!-- Menu items will be loaded dynamically -->
                                 </select>
                                 <div class="invalid-feedback">Please select an item.</div>
                             </div>
                             <div class="col-md-2">
                                 <label for="quantity1" class="form-label">Quantity</label>
-                                <input type="number" class="form-control" id="quantity1" min="1" value="1" required>
+                                <input type="number" class="form-control item-quantity" id="quantity1" min="1" value="1" required>
                                 <div class="invalid-feedback">Quantity must be at least 1.</div>
                             </div>
                             <div class="col-md-4">
@@ -531,12 +207,12 @@
     </div>
 </div>
 
-<!-- Order Detail Modal (would be shown when clicking "View Details") -->
+<!-- Order Detail Modal -->
 <div class="modal fade" id="orderDetailModal" tabindex="-1" aria-labelledby="orderDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="orderDetailModalLabel">Order #1001 Details</h5>
+                <h5 class="modal-title" id="orderDetailModalLabel">Order Details</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -546,52 +222,48 @@
                         <table class="table table-sm">
                             <tr>
                                 <th>Order ID:</th>
-                                <td>#1001</td>
+                                <td id="detailOrderId">#1001</td>
                             </tr>
                             <tr>
                                 <th>Date:</th>
-                                <td>April 6, 2025</td>
-                            </tr>
-                            <tr>
-                                <th>Time:</th>
-                                <td>10:45 AM</td>
+                                <td id="detailOrderDate">April 19, 2025</td>
                             </tr>
                             <tr>
                                 <th>Status:</th>
-                                <td><span class="badge bg-warning">Processing</span></td>
+                                <td id="detailOrderStatus"><span class="badge bg-warning">Processing</span></td>
                             </tr>
                             <tr>
                                 <th>Table:</th>
-                                <td>Table 4</td>
+                                <td id="detailOrderTable">Table 4</td>
                             </tr>
                             <tr>
                                 <th>Waiter:</th>
-                                <td>John Smith</td>
+                                <td id="detailOrderWaiter">John Smith</td>
+                            </tr>
+                            <tr>
+                                <th>Customer:</th>
+                                <td id="detailCustomerName">Walk-in Customer</td>
                             </tr>
                         </table>
                     </div>
                     <div class="col-md-6">
-                        <h6>Customer Information</h6>
-                        <table class="table table-sm">
-                            <tr>
-                                <th>Name:</th>
-                                <td>Walk-in Customer</td>
-                            </tr>
-                        </table>
+                        <h6>Actions</h6>
+                        <div class="btn-group mb-3" role="group">
+                            <button type="button" class="btn btn-outline-primary" id="updateStatusBtn">
+                                <i class="bi bi-arrow-up-circle me-1"></i> Update Status
+                            </button>
+                            <button type="button" class="btn btn-outline-success" id="processPaymentBtn">
+                                <i class="bi bi-credit-card me-1"></i> Process Payment
+                            </button>
+                            <button type="button" class="btn btn-outline-danger" id="cancelOrderBtn">
+                                <i class="bi bi-x-circle me-1"></i> Cancel Order
+                            </button>
+                        </div>
                         
-                        <h6 class="mt-4">Order Timeline</h6>
-                        <div class="timeline">
-                            <div class="timeline-item">
-                                <div class="fw-bold">Order Created</div>
-                                <div class="text-muted small">10:45 AM</div>
-                            </div>
-                            <div class="timeline-item">
-                                <div class="fw-bold">Order Sent to Kitchen</div>
-                                <div class="text-muted small">10:47 AM</div>
-                            </div>
-                            <div class="timeline-item">
-                                <div class="fw-bold">Food Preparation Started</div>
-                                <div class="text-muted small">10:50 AM</div>
+                        <h6 class="mt-4">Payment Status</h6>
+                        <div id="paymentStatusContainer">
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle me-2"></i> Payment not yet processed.
                             </div>
                         </div>
                     </div>
@@ -609,74 +281,86 @@
                                 <th>Status</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>Grilled Salmon</td>
-                                <td>$18.99</td>
-                                <td>1</td>
-                                <td>$18.99</td>
-                                <td><span class="badge bg-info">Preparing</span></td>
-                            </tr>
-                            <tr>
-                                <td>Fresh Orange Juice</td>
-                                <td>$4.99</td>
-                                <td>2</td>
-                                <td>$9.98</td>
-                                <td><span class="badge bg-success">Delivered</span></td>
-                            </tr>
-                            <tr>
-                                <td>Chocolate Cake</td>
-                                <td>$7.99</td>
-                                <td>1</td>
-                                <td>$7.99</td>
-                                <td><span class="badge bg-warning">Pending</span></td>
-                            </tr>
+                        <tbody id="orderItemsTableBody">
+                            <!-- Order items will be loaded dynamically -->
                         </tbody>
                         <tfoot>
                             <tr>
-                                <th colspan="3" class="text-end">Subtotal:</th>
-                                <td>$36.96</td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <th colspan="3" class="text-end">Tax (15%):</th>
-                                <td>$5.54</td>
-                                <td></td>
-                            </tr>
-                            <tr>
-                                <th colspan="3" class="text-end">Service Charge (10%):</th>
-                                <td>$3.70</td>
-                                <td></td>
-                            </tr>
-                            <tr>
                                 <th colspan="3" class="text-end">Total:</th>
-                                <td class="fw-bold">$46.20</td>
+                                <td id="detailOrderTotal" class="fw-bold">$45.80</td>
                                 <td></td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
-                
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <h6>Payment Information</h6>
-                        <div class="alert alert-warning">
-                            <i class="bi bi-exclamation-triangle me-2"></i> Payment not yet processed.
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <h6>Actions</h6>
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-outline-primary">Update Status</button>
-                            <button type="button" class="btn btn-outline-success">Process Payment</button>
-                            <button type="button" class="btn btn-outline-danger">Cancel Order</button>
-                        </div>
-                    </div>
-                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Print Receipt</button>
+                <button type="button" class="btn btn-primary" id="printReceiptBtn">Print Receipt</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Status Modal -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1" aria-labelledby="updateStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateStatusModalLabel">Update Order Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="updateStatusOrderId">
+                <div class="mb-3">
+                    <label for="orderStatusSelect" class="form-label">Select New Status</label>
+                    <select class="form-select" id="orderStatusSelect">
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmStatusUpdateBtn">Update Status</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Process Payment Modal -->
+<div class="modal fade" id="processPaymentModal" tabindex="-1" aria-labelledby="processPaymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="processPaymentModalLabel">Process Payment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="paymentOrderId">
+                <div class="mb-3">
+                    <label class="form-label">Order Total</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="text" class="form-control" id="paymentAmount" readonly>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="paymentMethod" class="form-label">Payment Method</label>
+                    <select class="form-select" id="paymentMethod" required>
+                        <option value="">Select payment method</option>
+                        <option value="cash">Cash</option>
+                        <option value="credit_card">Credit Card</option>
+                        <option value="debit_card">Debit Card</option>
+                        <option value="mobile_payment">Mobile Payment</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmPaymentBtn">Process Payment</button>
             </div>
         </div>
     </div>
@@ -685,127 +369,918 @@
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Order filter dropdown
-        const filterLinks = document.querySelectorAll('.dropdown-item[data-filter]');
-        filterLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                // Remove active class from all links
-                filterLinks.forEach(l => l.classList.remove('active'));
-                
-                // Add active class to clicked link
-                this.classList.add('active');
-                
-                // Update dropdown button text
-                const filter = this.dataset.filter;
-                const buttonText = filter === 'all' ? 'All Orders' : this.textContent;
-                document.getElementById('orderFilterDropdown').textContent = 'Filter: ' + buttonText;
-                
-                // Filter orders (would be AJAX in real implementation)
-                console.log('Filtering by:', filter);
-            });
-        });
-        
-        // Add item button in new order form
-        const addItemBtn = document.getElementById('addItemBtn');
-        if (addItemBtn) {
-            let itemCount = 1;
+document.addEventListener('DOMContentLoaded', function() {
+    // Global variables
+    let currentPage = 1;
+    let pageSize = 12;
+    let currentFilter = 'all';
+    let orders = [];
+    let tables = [];
+    let waitstaff = [];
+    let customers = [];
+    let menuItems = [];
+    
+    // Initialize
+    loadOrders();
+    loadTables();
+    loadWaitstaff();
+    loadCustomers();
+    loadMenuItems();
+    
+    // Status filter dropdown
+    const filterLinks = document.querySelectorAll('.dropdown-item[data-filter]');
+    filterLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
             
-            addItemBtn.addEventListener('click', function() {
-                itemCount++;
-                const orderItems = document.getElementById('orderItems');
+            // Remove active class from all links
+            filterLinks.forEach(l => l.classList.remove('active'));
+            
+            // Add active class to clicked link
+            this.classList.add('active');
+            
+            // Update dropdown button text
+            const filter = this.dataset.filter;
+            document.getElementById('orderFilterDropdown').textContent = 'Filter: ' + this.textContent;
+            
+            // Update current filter and reload orders
+            currentFilter = filter;
+            loadOrders();
+        });
+    });
+    
+    // Search input
+    const searchInput = document.getElementById('searchOrders');
+    searchInput.addEventListener('input', function() {
+        // Simple local filtering for demo
+        const searchTerm = this.value.toLowerCase();
+        filterOrderCards(searchTerm);
+    });
+    
+    // Apply date filter button
+    const applyFilterBtn = document.getElementById('applyFilterBtn');
+    applyFilterBtn.addEventListener('click', function() {
+        // This would normally use API filtering
+        // For now, just log the selected dates
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        console.log(`Filtering orders from ${startDate} to ${endDate}`);
+        alert(`Date filtering would filter orders from ${startDate || 'any date'} to ${endDate || 'any date'}`);
+    });
+    
+    // Add item to order button
+    const addItemBtn = document.getElementById('addItemBtn');
+    addItemBtn.addEventListener('click', function() {
+        addOrderItem();
+    });
+    
+    // New order form submission
+    const newOrderForm = document.getElementById('newOrderForm');
+    newOrderForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!this.checkValidity()) {
+            e.stopPropagation();
+            this.classList.add('was-validated');
+            return;
+        }
+        
+        createOrder();
+    });
+    
+    // View order details
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.view-details-btn')) {
+            const orderId = e.target.closest('.view-details-btn').dataset.orderId;
+            showOrderDetails(orderId);
+        }
+    });
+    
+    // Update status button
+    document.getElementById('updateStatusBtn').addEventListener('click', function() {
+        const orderId = document.getElementById('detailOrderId').textContent.replace('#', '');
+        document.getElementById('updateStatusOrderId').value = orderId;
+        
+        // Set current status in the select
+        const statusText = document.getElementById('detailOrderStatus').textContent.toLowerCase();
+        document.getElementById('orderStatusSelect').value = 
+            statusText.includes('pending') ? 'pending' : 
+            statusText.includes('processing') ? 'processing' : 
+            statusText.includes('completed') ? 'completed' : 
+            statusText.includes('cancelled') ? 'cancelled' : 'pending';
+        
+        const updateStatusModal = new bootstrap.Modal(document.getElementById('updateStatusModal'));
+        updateStatusModal.show();
+    });
+    
+    // Process payment button
+    document.getElementById('processPaymentBtn').addEventListener('click', function() {
+        const orderId = document.getElementById('detailOrderId').textContent.replace('#', '');
+        const orderTotal = document.getElementById('detailOrderTotal').textContent.replace('$', '');
+        
+        document.getElementById('paymentOrderId').value = orderId;
+        document.getElementById('paymentAmount').value = orderTotal;
+        
+        const processPaymentModal = new bootstrap.Modal(document.getElementById('processPaymentModal'));
+        processPaymentModal.show();
+    });
+    
+    // Confirm status update
+    document.getElementById('confirmStatusUpdateBtn').addEventListener('click', function() {
+        const orderId = document.getElementById('updateStatusOrderId').value;
+        const status = document.getElementById('orderStatusSelect').value;
+        
+        updateOrderStatus(orderId, status);
+    });
+    
+    // Confirm payment
+    document.getElementById('confirmPaymentBtn').addEventListener('click', function() {
+        const orderId = document.getElementById('paymentOrderId').value;
+        const amount = document.getElementById('paymentAmount').value;
+        const method = document.getElementById('paymentMethod').value;
+        
+        if (!method) {
+            alert('Please select a payment method');
+            return;
+        }
+        
+        processPayment(orderId, amount, method);
+    });
+    
+    // Cancel order button
+    document.getElementById('cancelOrderBtn').addEventListener('click', function() {
+        const orderId = document.getElementById('detailOrderId').textContent.replace('#', '');
+        
+        if (confirm('Are you sure you want to cancel this order? This action cannot be undone.')) {
+            updateOrderStatus(orderId, 'cancelled');
+        }
+    });
+    
+    // Print receipt button
+    document.getElementById('printReceiptBtn').addEventListener('click', function() {
+        const orderId = document.getElementById('detailOrderId').textContent.replace('#', '');
+        alert(`Printing receipt for order #${orderId}`);
+        // In a real implementation, this would open a print dialog
+    });
+    
+    // Load orders
+    function loadOrders() {
+        // Show loading indicator
+        document.getElementById('ordersLoading').classList.remove('d-none');
+        
+        // Clear orders container
+        const orderCards = document.querySelectorAll('.order-card-container');
+        orderCards.forEach(card => card.remove());
+        
+        // Build API URL with filters
+        let url = `/api/v1/orders?skip=${(currentPage - 1) * pageSize}&limit=${pageSize}`;
+        
+        if (currentFilter !== 'all') {
+            url += `&status=${currentFilter}`;
+        }
+        
+        // Fetch orders
+        fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${getAuthToken()}`
+            },
+            credentials: 'include'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to load orders');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Hide loading indicator
+            document.getElementById('ordersLoading').classList.add('d-none');
+            
+            orders = data;
+            
+            if (data.length === 0) {
+                const emptyMessage = document.createElement('div');
+                emptyMessage.className = 'col-12';
+                emptyMessage.innerHTML = `
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i> No orders found.
+                    </div>
+                `;
+                document.getElementById('ordersContainer').appendChild(emptyMessage);
+                return;
+            }
+            
+            // Render orders
+            renderOrders(data);
+        })
+        .catch(error => {
+            console.error('Error loading orders:', error);
+            
+            document.getElementById('ordersLoading').classList.add('d-none');
+            
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'col-12';
+            errorMessage.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i> Error loading orders: ${error.message}
+                </div>
+            `;
+            document.getElementById('ordersContainer').appendChild(errorMessage);
+        });
+    }
+    
+    // Render orders
+    function renderOrders(orders) {
+        const container = document.getElementById('ordersContainer');
+        
+        orders.forEach(order => {
+            // Create order card
+            const orderCard = document.createElement('div');
+            orderCard.className = 'col-lg-4 col-md-6 mb-4 order-card-container';
+            orderCard.dataset.orderId = order.order_id;
+            
+            // Format date
+            const orderDate = new Date(order.order_date);
+            const formattedDate = orderDate.toLocaleDateString();
+            const formattedTime = orderDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            // Determine status badge
+            let statusBadge;
+            switch(order.status) {
+                case 'pending':
+                    statusBadge = '<span class="badge bg-info status-badge">Pending</span>';
+                    break;
+                case 'processing':
+                    statusBadge = '<span class="badge bg-warning status-badge">Processing</span>';
+                    break;
+                case 'completed':
+                    statusBadge = '<span class="badge bg-success status-badge">Completed</span>';
+                    break;
+                case 'cancelled':
+                    statusBadge = '<span class="badge bg-danger status-badge">Cancelled</span>';
+                    break;
+                default:
+                    statusBadge = '<span class="badge bg-secondary status-badge">Unknown</span>';
+            }
+            
+            // Get table and waiter info
+            const tableName = order.table ? order.table.table_number : 'Unknown';
+            const waiterName = order.waiter ? order.waiter.name : 'Unknown';
+            
+            // Order items summary (show first 3)
+            let itemsHtml = '<ul class="list-unstyled ms-3 mb-0">';
+            if (order.order_items && order.order_items.length > 0) {
+                order.order_items.slice(0, 3).forEach(item => {
+                    itemsHtml += `<li>${item.quantity} × Item #${item.menu_item_id}</li>`;
+                });
                 
-                const newItem = document.createElement('div');
-                newItem.className = 'row mb-3 align-items-end order-item';
-                newItem.innerHTML = `
-                    <div class="col-md-5">
-                        <label for="item${itemCount}" class="form-label">Item</label>
-                        <select class="form-select" id="item${itemCount}" required>
-                            <option value="">Select an item</option>
-                            <option value="1">Grilled Salmon - $18.99</option>
-                            <option value="2">Beef Steak - $22.99</option>
-                            <option value="3">Cheese Platter - $10.99</option>
-                            <option value="4">Chocolate Cake - $7.99</option>
-                            <option value="5">Fresh Orange Juice - $4.99</option>
-                        </select>
-                        <div class="invalid-feedback">Please select an item.</div>
+                if (order.order_items.length > 3) {
+                    itemsHtml += `<li>+ ${order.order_items.length - 3} more item(s)</li>`;
+                }
+            } else {
+                itemsHtml += '<li>No items</li>';
+            }
+            itemsHtml += '</ul>';
+            
+            orderCard.innerHTML = `
+                <div class="card order-card shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">#${order.order_id.toString().padStart(4, '0')}</h5>
+                        ${statusBadge}
                     </div>
-                    <div class="col-md-2">
-                        <label for="quantity${itemCount}" class="form-label">Quantity</label>
-                        <input type="number" class="form-control" id="quantity${itemCount}" min="1" value="1" required>
-                        <div class="invalid-feedback">Quantity must be at least 1.</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="mb-1"><strong>Table:</strong> ${tableName}</div>
+                            <div class="mb-1"><strong>Waiter:</strong> ${waiterName}</div>
+                            <div><strong>Time:</strong> <span class="text-muted">${formattedDate}, ${formattedTime}</span></div>
+                        </div>
+                        <div class="order-summary mb-3">
+                            <div><strong>Items:</strong></div>
+                            ${itemsHtml}
+                        </div>
+                        <div class="text-end mb-3">
+                            <strong>Total:</strong> <span class="fs-5">$${parseFloat(order.total_amount).toFixed(2)}</span>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-outline-primary view-details-btn" data-order-id="${order.order_id}">
+                                View Details
+                            </button>
+                        </div>
                     </div>
-                    <div class="col-md-4">
-                        <label for="specialRequest${itemCount}" class="form-label">Special Request</label>
-                        <input type="text" class="form-control" id="specialRequest${itemCount}" placeholder="Optional">
-                    </div>
-                    <div class="col-md-1">
-                        <button type="button" class="btn btn-outline-danger remove-item">
-                            <i class="bi bi-trash"></i>
-                        </button>
+                </div>
+            `;
+            
+            container.appendChild(orderCard);
+        });
+    }
+    
+    // Filter order cards based on search term
+    function filterOrderCards(searchTerm) {
+        const orderCards = document.querySelectorAll('.order-card-container');
+        
+        orderCards.forEach(card => {
+            const cardText = card.textContent.toLowerCase();
+            if (cardText.includes(searchTerm)) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    
+    // Show order details
+    function showOrderDetails(orderId) {
+        // Update modal title
+        document.getElementById('orderDetailModalLabel').textContent = `Order #${orderId} Details`;
+        
+        // Fetch order details
+        fetch(`/api/v1/orders/${orderId}`, {
+            headers: {
+                'Authorization': `Bearer ${getAuthToken()}`
+            },
+            credentials: 'include'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to load order details');
+            }
+            return response.json();
+        })
+        .then(order => {
+            // Update order details in modal
+            updateOrderDetailsModal(order);
+            
+            // Show modal
+            const orderDetailModal = new bootstrap.Modal(document.getElementById('orderDetailModal'));
+            orderDetailModal.show();
+        })
+        .catch(error => {
+            console.error('Error loading order details:', error);
+            alert('Error loading order details: ' + error.message);
+        });
+    }
+    
+    // Update order details modal
+    function updateOrderDetailsModal(order) {
+        // Format date
+        const orderDate = new Date(order.order_date);
+        const formattedDate = orderDate.toLocaleDateString();
+        
+        // Update order information
+        document.getElementById('detailOrderId').textContent = '#' + order.order_id.toString().padStart(4, '0');
+        document.getElementById('detailOrderDate').textContent = formattedDate;
+        
+        // Status badge
+        let statusBadge;
+        switch(order.status) {
+            case 'pending':
+                statusBadge = '<span class="badge bg-info">Pending</span>';
+                break;
+            case 'processing':
+                statusBadge = '<span class="badge bg-warning">Processing</span>';
+                break;
+            case 'completed':
+                statusBadge = '<span class="badge bg-success">Completed</span>';
+                break;
+            case 'cancelled':
+                statusBadge = '<span class="badge bg-danger">Cancelled</span>';
+                break;
+            default:
+                statusBadge = '<span class="badge bg-secondary">Unknown</span>';
+        }
+        document.getElementById('detailOrderStatus').innerHTML = statusBadge;
+        
+        // Table and waiter
+        document.getElementById('detailOrderTable').textContent = order.table ? order.table.table_number : 'Unknown';
+        document.getElementById('detailOrderWaiter').textContent = order.waiter ? order.waiter.name : 'Unknown';
+        
+        // Customer
+        document.getElementById('detailCustomerName').textContent = order.customer ? order.customer.name : 'Walk-in Customer';
+        
+        // Order items
+        const orderItemsTableBody = document.getElementById('orderItemsTableBody');
+        orderItemsTableBody.innerHTML = '';
+        
+        let total = 0;
+        
+        if (order.order_items && order.order_items.length > 0) {
+            order.order_items.forEach(item => {
+                const row = document.createElement('tr');
+                
+                // Get menu item details
+                const menuItem = menuItems.find(mi => mi.menu_item_id === item.menu_item_id) || 
+                    { name: `Item #${item.menu_item_id}`, price: 0 };
+                
+                const subtotal = menuItem.price * item.quantity;
+                total += subtotal;
+                
+                // Item status badge
+                let itemStatusBadge;
+                switch(item.status) {
+                    case 'pending':
+                        itemStatusBadge = '<span class="badge bg-info">Pending</span>';
+                        break;
+                    case 'preparing':
+                        itemStatusBadge = '<span class="badge bg-warning">Preparing</span>';
+                        break;
+                    case 'ready':
+                        itemStatusBadge = '<span class="badge bg-primary">Ready</span>';
+                        break;
+                    case 'delivered':
+                        itemStatusBadge = '<span class="badge bg-success">Delivered</span>';
+                        break;
+                    case 'cancelled':
+                        itemStatusBadge = '<span class="badge bg-danger">Cancelled</span>';
+                        break;
+                    default:
+                        itemStatusBadge = '<span class="badge bg-secondary">Unknown</span>';
+                }
+                
+                row.innerHTML = `
+                    <td>${menuItem.name}</td>
+                    <td>${parseFloat(menuItem.price).toFixed(2)}</td>
+                    <td>${item.quantity}</td>
+                    <td>${subtotal.toFixed(2)}</td>
+                    <td>${itemStatusBadge}</td>
+                `;
+                
+                orderItemsTableBody.appendChild(row);
+            });
+        } else {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="5" class="text-center">No items found</td>';
+            orderItemsTableBody.appendChild(row);
+        }
+        
+        // Update total
+        document.getElementById('detailOrderTotal').textContent = ' + total.toFixed(2);'
+        
+        // Update payment status
+        checkPaymentStatus(order.order_id);
+        
+        // Show/hide action buttons based on order status
+        updateActionButtons(order.status);
+    }
+    
+    // Check payment status
+    function checkPaymentStatus(orderId) {
+        fetch(`/api/v1/payments/check-paid/${orderId}`, {
+            headers: {
+                'Authorization': `Bearer ${getAuthToken()}`
+            },
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            const paymentStatusContainer = document.getElementById('paymentStatusContainer');
+            
+            if (data.is_fully_paid) {
+                paymentStatusContainer.innerHTML = `
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle me-2"></i> Payment completed.
+                        <p class="mb-0">Paid: ${parseFloat(data.total_paid).toFixed(2)}</p>
                     </div>
                 `;
                 
-                orderItems.appendChild(newItem);
+                // Hide payment button if fully paid
+                document.getElementById('processPaymentBtn').style.display = 'none';
+            } else if (data.total_paid > 0) {
+                paymentStatusContainer.innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i> Partially paid.
+                        <p class="mb-0">Paid: ${parseFloat(data.total_paid).toFixed(2)}</p>
+                        <p class="mb-0">Balance: ${(parseFloat(data.total_amount) - parseFloat(data.total_paid)).toFixed(2)}</p>
+                    </div>
+                `;
+            } else {
+                paymentStatusContainer.innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i> Payment not yet processed.
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error checking payment status:', error);
+            document.getElementById('paymentStatusContainer').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i> Error checking payment status.
+                </div>
+            `;
+        });
+    }
+    
+    // Update action buttons based on order status
+    function updateActionButtons(status) {
+        const cancelBtn = document.getElementById('cancelOrderBtn');
+        
+        // Hide cancel button if order is already completed or cancelled
+        if (status === 'completed' || status === 'cancelled') {
+            cancelBtn.style.display = 'none';
+        } else {
+            cancelBtn.style.display = 'inline-block';
+        }
+    }
+    
+    // Update order status
+    function updateOrderStatus(orderId, status) {
+        fetch(`/api/v1/orders/${orderId}/status?status=${status}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${getAuthToken()}`
+            },
+            credentials: 'include'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to update order status');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Close update status modal if it's open
+            const updateStatusModal = bootstrap.Modal.getInstance(document.getElementById('updateStatusModal'));
+            if (updateStatusModal) {
+                updateStatusModal.hide();
+            }
+            
+            // Reload orders
+            loadOrders();
+            
+            // If order detail modal is open, refresh it
+            const orderDetailModal = document.getElementById('orderDetailModal');
+            if (orderDetailModal.classList.contains('show')) {
+                showOrderDetails(orderId);
+            }
+            
+            // Show success message
+            alert(`Order status updated to ${status}`);
+        })
+        .catch(error => {
+            console.error('Error updating order status:', error);
+            alert('Error updating order status: ' + error.message);
+        });
+    }
+    
+    // Process payment
+    function processPayment(orderId, amount, method) {
+        const paymentData = {
+            order_id: parseInt(orderId),
+            amount: parseFloat(amount),
+            payment_method: method
+        };
+        
+        fetch('/api/v1/payments/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getAuthToken()}`
+            },
+            body: JSON.stringify(paymentData),
+            credentials: 'include'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to process payment');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Close payment modal
+            const paymentModal = bootstrap.Modal.getInstance(document.getElementById('processPaymentModal'));
+            paymentModal.hide();
+            
+            // Refresh payment status
+            checkPaymentStatus(orderId);
+            
+            // Show success message
+            alert('Payment processed successfully');
+        })
+        .catch(error => {
+            console.error('Error processing payment:', error);
+            alert('Error processing payment: ' + error.message);
+        });
+    }
+    
+    // Load tables, waitstaff, customers, and menu items
+    function loadTables() {
+        fetch('/api/v1/tables', {
+            headers: {
+                'Authorization': `Bearer ${getAuthToken()}`
+            },
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            tables = data;
+            
+            // Populate table select in new order form
+            const tableSelect = document.getElementById('orderTable');
+            tableSelect.innerHTML = '<option value="">Select a table</option>';
+            
+            tables.forEach(table => {
+                const option = document.createElement('option');
+                option.value = table.table_id;
+                option.textContent = `${table.table_number} (Capacity: ${table.capacity})`;
+                tableSelect.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error loading tables:', error));
+    }
+    
+    function loadWaitstaff() {
+        fetch('/api/v1/waitstaff', {
+            headers: {
+                'Authorization': `Bearer ${getAuthToken()}`
+            },
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            waitstaff = data;
+            
+            // Populate waiter select in new order form
+            const waiterSelect = document.getElementById('orderWaiter');
+            waiterSelect.innerHTML = '<option value="">Select a waiter</option>';
+            
+            waitstaff.forEach(staff => {
+                const option = document.createElement('option');
+                option.value = staff.staff_id;
+                option.textContent = staff.name;
+                waiterSelect.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error loading waitstaff:', error));
+    }
+    
+    function loadCustomers() {
+        fetch('/api/v1/customers', {
+            headers: {
+                'Authorization': `Bearer ${getAuthToken()}`
+            },
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            customers = data;
+            
+            // Populate customer select in new order form
+            const customerSelect = document.getElementById('orderCustomer');
+            customerSelect.innerHTML = '<option value="">Select a customer</option>';
+            
+            customers.forEach(customer => {
+                const option = document.createElement('option');
+                option.value = customer.customer_id;
+                option.textContent = `${customer.name} (${customer.contact_number || 'No contact'})`;
+                customerSelect.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error loading customers:', error));
+    }
+    
+    function loadMenuItems() {
+        fetch('/api/v1/menu-items?available_only=true', {
+            headers: {
+                'Authorization': `Bearer ${getAuthToken()}`
+            },
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            menuItems = data;
+            
+            // Populate item select in new order form
+            const itemSelect = document.querySelector('.item-select');
+            itemSelect.innerHTML = '<option value="">Select an item</option>';
+            
+            menuItems.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.menu_item_id;
+                option.textContent = `${item.name} - ${parseFloat(item.price).toFixed(2)}`;
+                option.dataset.price = item.price;
+                itemSelect.appendChild(option);
+            });
+            
+            // Add change event to update total
+            itemSelect.addEventListener('change', updateOrderTotal);
+            document.querySelector('.item-quantity').addEventListener('input', updateOrderTotal);
+        })
+        .catch(error => console.error('Error loading menu items:', error));
+    }
+    
+    // Add a new item row to order form
+    function addOrderItem() {
+        const orderItems = document.getElementById('orderItems');
+        const itemCount = orderItems.querySelectorAll('.order-item').length + 1;
+        
+        const newItem = document.createElement('div');
+        newItem.className = 'row mb-3 align-items-end order-item';
+        
+        newItem.innerHTML = `
+            <div class="col-md-5">
+                <label for="item${itemCount}" class="form-label">Item</label>
+                <select class="form-select item-select" id="item${itemCount}" required>
+                    <option value="">Select an item</option>
+                </select>
+                <div class="invalid-feedback">Please select an item.</div>
+            </div>
+            <div class="col-md-2">
+                <label for="quantity${itemCount}" class="form-label">Quantity</label>
+                <input type="number" class="form-control item-quantity" id="quantity${itemCount}" min="1" value="1" required>
+                <div class="invalid-feedback">Quantity must be at least 1.</div>
+            </div>
+            <div class="col-md-4">
+                <label for="specialRequest${itemCount}" class="form-label">Special Request</label>
+                <input type="text" class="form-control" id="specialRequest${itemCount}" placeholder="Optional">
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-outline-danger remove-item">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        `;
+        
+        orderItems.appendChild(newItem);
+        
+        // Populate the new select with menu items
+        const itemSelect = newItem.querySelector('.item-select');
+        menuItems.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.menu_item_id;
+            option.textContent = `${item.name} - ${parseFloat(item.price).toFixed(2)}`;
+            option.dataset.price = item.price;
+            itemSelect.appendChild(option);
+        });
+        
+        // Add event listeners
+        itemSelect.addEventListener('change', updateOrderTotal);
+        newItem.querySelector('.item-quantity').addEventListener('input', updateOrderTotal);
+        
+        newItem.querySelector('.remove-item').addEventListener('click', function() {
+            if (orderItems.querySelectorAll('.order-item').length > 1) {
+                this.closest('.order-item').remove();
+                updateOrderTotal();
+            }
+        });
+    }
+    
+    // Update order total in the new order form
+    function updateOrderTotal() {
+        let total = 0;
+        
+        document.querySelectorAll('.order-item').forEach(item => {
+            const select = item.querySelector('.item-select');
+            const quantity = parseInt(item.querySelector('.item-quantity').value) || 0;
+            
+            if (select.value) {
+                const selectedOption = select.options[select.selectedIndex];
+                const price = parseFloat(selectedOption.dataset.price) || 0;
+                total += price * quantity;
+            }
+        });
+        
+        document.getElementById('orderTotal').textContent = ' + total.toFixed(2);'
+    }
+    
+    // Create a new order
+    function createOrder() {
+        // Get form data
+        const tableId = document.getElementById('orderTable').value;
+        const waiterId = document.getElementById('orderWaiter').value;
+        let customerId = document.getElementById('orderCustomer').value;
+        
+        // Check if new customer form is visible and has data
+        const newCustomerForm = document.getElementById('newCustomerForm');
+        let customerData = null;
+        
+        if (newCustomerForm.classList.contains('show')) {
+            const customerName = document.getElementById('customerName').value;
+            const customerPhone = document.getElementById('customerPhone').value;
+            
+            if (customerName || customerPhone) {
+                customerData = {
+                    name: customerName,
+                    contact_number: customerPhone
+                };
+            }
+        }
+        
+        // Get order items
+        const orderItems = [];
+        document.querySelectorAll('.order-item').forEach(item => {
+            const menuItemId = item.querySelector('.item-select').value;
+            const quantity = item.querySelector('.item-quantity').value;
+            const specialRequest = item.querySelector('input[id^="specialRequest"]').value;
+            
+            if (menuItemId) {
+                orderItems.push({
+                    menu_item_id: parseInt(menuItemId),
+                    quantity: parseInt(quantity),
+                    special_request: specialRequest,
+                    status: 'pending'
+                });
+            }
+        });
+        
+        if (orderItems.length === 0) {
+            alert('Please add at least one item to the order');
+            return;
+        }
+        
+        // Create order data
+        const orderData = {
+            table_id: parseInt(tableId),
+            waiter_id: parseInt(waiterId),
+            status: 'pending',
+            order_items: orderItems
+        };
+        
+        // Add customer ID if selected
+        if (customerId) {
+            orderData.customer_id = parseInt(customerId);
+        }
+        
+        // Create customer first if needed, then create order
+        let createOrderPromise;
+        
+        if (customerData) {
+            createOrderPromise = fetch('/api/v1/customers/get-or-create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getAuthToken()}`
+                },
+                body: JSON.stringify(customerData),
+                credentials: 'include'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to create customer');
+                }
+                return response.json();
+            })
+            .then(customer => {
+                orderData.customer_id = customer.customer_id;
                 
-                // Add event listener to new remove button
-                const removeButtons = document.querySelectorAll('.remove-item');
-                removeButtons.forEach(button => {
-                    button.addEventListener('click', function() {
-                        if (document.querySelectorAll('.order-item').length > 1) {
-                            this.closest('.order-item').remove();
-                            updateOrderTotal();
-                        }
-                    });
+                return fetch('/api/v1/orders/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getAuthToken()}`
+                    },
+                    body: JSON.stringify(orderData),
+                    credentials: 'include'
                 });
             });
-        }
-        
-        // Calculate order total
-        function updateOrderTotal() {
-            // In a real implementation, this would calculate the actual total based on selected items
-            document.getElementById('orderTotal').textContent = '$45.80';
-        }
-        
-        // Show order detail modal when clicking "View Details"
-        const viewDetailLinks = document.querySelectorAll('a[href^="/orders/"]');
-        viewDetailLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const orderId = this.getAttribute('href').split('/').pop();
-                
-                // Update modal title with order ID
-                document.getElementById('orderDetailModalLabel').textContent = `Order #${orderId} Details`;
-                
-                // Show the modal
-                const orderDetailModal = new bootstrap.Modal(document.getElementById('orderDetailModal'));
-                orderDetailModal.show();
+        } else {
+            createOrderPromise = fetch('/api/v1/orders/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getAuthToken()}`
+                },
+                body: JSON.stringify(orderData),
+                credentials: 'include'
             });
-        });
+        }
         
-        // Form validation
-        const forms = document.querySelectorAll('.needs-validation');
-        Array.from(forms).forEach(form => {
-            form.addEventListener('submit', event => {
-                if (!form.checkValidity()) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                } else {
-                    // For demo purposes, prevent actual form submission
-                    event.preventDefault();
-                    
-                    // Show success message or redirect in a real implementation
-                    if (form.id === 'newOrderForm') {
-                        alert('Order created successfully!');
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('newOrderModal'));
-                        modal.hide();
-                    }
+        createOrderPromise
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to create order');
+            }
+            return response.json();
+        })
+        .then(newOrder => {
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('newOrderModal'));
+            modal.hide();
+            
+            // Reset form
+            document.getElementById('newOrderForm').reset();
+            document.querySelectorAll('.order-item').forEach((item, index) => {
+                if (index > 0) {
+                    item.remove();
                 }
-                form.classList.add('was-validated');
-            }, false);
+            });
+            document.getElementById('orderTotal').textContent = '$0.00';
+            
+            // Reload orders
+            loadOrders();
+            
+            // Show success message
+            alert('Order created successfully!');
+        })
+        .catch(error => {
+            console.error('Error creating order:', error);
+            alert('Error creating order: ' + error.message);
         });
-    });
+    }
+    
+    // Helper function to get auth token
+    function getAuthToken() {
+        return localStorage.getItem('auth_token');
+    }
+});
 </script>
 {% endblock %}

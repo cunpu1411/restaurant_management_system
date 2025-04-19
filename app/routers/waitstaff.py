@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -16,7 +16,7 @@ def read_waitstaff(
     skip: int = 0, 
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Retrieve waitstaff.
@@ -36,7 +36,7 @@ def create_waitstaff(
     *,
     db: Session = Depends(get_db),
     waitstaff_in: WaitstaffCreate,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Create new waitstaff.
@@ -63,7 +63,7 @@ def create_waitstaff(
 
 @router.get("/me", response_model=WaitstaffSchema)
 def read_waitstaff_me(
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Get current waitstaff.
@@ -75,7 +75,7 @@ def read_waitstaff_by_id(
     *,
     staff_id: int,
     db: Session = Depends(get_db),
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Get waitstaff by ID.
@@ -101,7 +101,7 @@ def update_waitstaff(
     staff_id: int,
     waitstaff_in: WaitstaffUpdate,
     db: Session = Depends(get_db),
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Update waitstaff.
@@ -145,7 +145,7 @@ def delete_waitstaff(
     *,
     staff_id: int,
     db: Session = Depends(get_db),
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Delete waitstaff.

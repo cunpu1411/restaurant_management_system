@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -17,7 +17,7 @@ def read_payments(
     skip: int = 0, 
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Retrieve payments.
@@ -36,7 +36,7 @@ def read_payments(
 def read_payments_by_order(
     order_id: int,
     db: Session = Depends(get_db),
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Retrieve payments for a specific order.
@@ -57,7 +57,7 @@ def create_payment(
     *,
     db: Session = Depends(get_db),
     payment_in: PaymentCreate,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Create new payment.
@@ -86,7 +86,7 @@ def read_payment(
     *,
     db: Session = Depends(get_db),
     payment_id: int,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Get payment by ID.
@@ -105,7 +105,7 @@ def update_payment(
     db: Session = Depends(get_db),
     payment_id: int,
     payment_in: PaymentUpdate,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Update a payment.
@@ -140,7 +140,7 @@ def delete_payment(
     *,
     db: Session = Depends(get_db),
     payment_id: int,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Delete a payment.
@@ -165,7 +165,7 @@ def check_order_fully_paid(
     *,
     db: Session = Depends(get_db),
     order_id: int,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Check if an order is fully paid.

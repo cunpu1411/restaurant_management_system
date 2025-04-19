@@ -22,7 +22,10 @@ async def auth_middleware(request: Request, call_next):
         '/api/v1/auth/login/json',
         '/favicon.ico',
         '/menu',
-        '/order'
+        '/order',
+        '/tables',
+        '/api/v1/tables',
+        '/api/v1/tables/'
     ]
     
     # Routes API công khai cho các thao tác GET
@@ -30,7 +33,12 @@ async def auth_middleware(request: Request, call_next):
         '/api/v1/menu-items',
         '/api/v1/categories',
         '/api/v1/customer/orders',
-        '/api/v1/dashboard/stats'
+        '/api/v1/dashboard/stats',
+        '/api/v1/tables',
+        '/api/v1/tables/',
+        '/api/v1/waitstaff',
+        '/api/v1/customers',
+        '/api/v1/orders'
     ]
     
     # Routes that should be accessible after login
@@ -120,7 +128,7 @@ async def auth_middleware(request: Request, call_next):
             # Cho phép truy cập các route đã xác thực
             return await call_next(request)
             
-        except JWTError as e:
+        except jwt.JWTError as e:
             # Token không hợp lệ, xóa token khỏi cookie và chuyển hướng đến trang login
             print(f"Invalid token for route: {request.url.path}, Error: {str(e)}")
             

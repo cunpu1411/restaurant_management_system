@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -16,7 +16,7 @@ def read_customers(
     skip: int = 0, 
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Retrieve customers.
@@ -29,7 +29,7 @@ def create_customer(
     *,
     db: Session = Depends(get_db),
     customer_in: CustomerCreate,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Create new customer.
@@ -53,7 +53,7 @@ def read_customer(
     *,
     db: Session = Depends(get_db),
     customer_id: int,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Get customer by ID.
@@ -72,7 +72,7 @@ def update_customer(
     db: Session = Depends(get_db),
     customer_id: int,
     customer_in: CustomerUpdate,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Update a customer.
@@ -102,7 +102,7 @@ def delete_customer(
     *,
     db: Session = Depends(get_db),
     customer_id: int,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Delete a customer.
@@ -127,7 +127,7 @@ def get_or_create_customer(
     *,
     db: Session = Depends(get_db),
     customer_in: CustomerCreate,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Get an existing customer by contact number or create a new one.

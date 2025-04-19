@@ -54,10 +54,13 @@ def create_access_token(subject: Union[str, Any], expires_delta: Optional[timede
 
 # Danh sách các đường dẫn không cần xác thực
 PUBLIC_PATHS = [
+    "/api/v1/auth/login",
+    "/api/v1/auth/login/json",
     "/api/v1/menu-items",
     "/menu",
     "/static/",
     "/login",
+    "/favicon.ico",
 ]
 
 def is_public_path(path: str) -> bool:
@@ -65,6 +68,9 @@ def is_public_path(path: str) -> bool:
     for public_path in PUBLIC_PATHS:
         if path.startswith(public_path):
             return True
+    # Thêm kiểm tra riêng cho tables
+    if path.startswith('/api/v1/tables'):
+        return True
     return False
 
 def get_current_user(
@@ -72,14 +78,12 @@ def get_current_user(
     db: Session = Depends(get_db), 
     token: Optional[str] = Cookie(None, alias="access_token"),
     header_token: Optional[str] = Depends(oauth2_scheme)
-) -> Waitstaff:
+) -> Optional[Waitstaff]:
     """Get current user from JWT token (either from cookie or header)"""
     # Cho phép truy cập vào các đường dẫn công khai mà không cần xác thực
     if request and is_public_path(request.url.path):
-        print(f"Public path detected: {request.url.path}")
-        # Nếu là GET hoặc path /menu, cho phép truy cập
-        if request.method == "GET":
-            print("GET request to public path, allowing access")
+        # Nếu là GET hoặc path /tables, cho phép truy cập
+        if request.method == "GET" or request.url.path.startswith('/tables'):
             return None
     
     # Ưu tiên sử dụng token từ header nếu có
@@ -105,7 +109,7 @@ def get_current_user(
                 detail="Could not validate credentials",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-    except jwt.PyJWTError as e:
+    except jwt.JWTError as e:
         print(f"JWT error: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

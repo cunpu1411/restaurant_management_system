@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -28,7 +28,7 @@ def create_category(
     *,
     db: Session = Depends(get_db),
     category_in: CategoryCreate,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Create new category.
@@ -71,7 +71,7 @@ def update_category(
     db: Session = Depends(get_db),
     category_id: int,
     category_in: CategoryUpdate,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Update a category.
@@ -96,7 +96,7 @@ def delete_category(
     *,
     db: Session = Depends(get_db),
     category_id: int,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Delete a category.

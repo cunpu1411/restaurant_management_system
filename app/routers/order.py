@@ -21,7 +21,7 @@ def read_orders(
     table_id: Optional[int] = None,
     waiter_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Retrieve orders.
@@ -38,7 +38,7 @@ def create_order(
     *,
     db: Session = Depends(get_db),
     order_in: OrderCreate,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Create new order.
@@ -55,7 +55,7 @@ def read_order(
     *,
     db: Session = Depends(get_db),
     order_id: int,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Get order by ID with all details.
@@ -74,7 +74,7 @@ def update_order(
     db: Session = Depends(get_db),
     order_id: int,
     order_in: OrderUpdate,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Update an order.
@@ -92,7 +92,7 @@ def delete_order(
     *,
     db: Session = Depends(get_db),
     order_id: int,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Delete an order.
@@ -118,7 +118,7 @@ def update_order_status(
     db: Session = Depends(get_db),
     order_id: int,
     status: str,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Update the status of an order.

@@ -523,3 +523,161 @@ async function toggleAvailability(itemId) {
         alert('Failed to update item availability. Please try again.');
     }
 }
+
+// Thêm function này nếu chưa có
+function loadTables() {
+    // Lấy token từ localStorage (nếu có)
+    const token = localStorage.getItem('auth_token');
+    const headers = {};
+    
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    fetch('/api/v1/tables/', {
+        headers: headers,
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to load tables');
+        }
+        return response.json();
+    })
+    .then(tables => {
+        console.log('Tables loaded:', tables);
+        renderTables(tables); // Gọi function hiển thị bàn
+    })
+    .catch(error => {
+        console.error('Error loading tables:', error);
+        alert('Error loading tables: ' + error.message);
+    });
+}
+
+// Function hiển thị bàn lên giao diện
+function renderTables(tables) {
+    const tablesContainer = document.getElementById('tablesContainer');
+    if (!tablesContainer) return;
+    
+    tablesContainer.innerHTML = '';
+    
+    if (tables.length === 0) {
+        tablesContainer.innerHTML = '<div class="col-12"><div class="alert alert-info">No tables found. Click "Add Table" to create one.</div></div>';
+        return;
+    }
+    
+    tables.forEach(table => {
+        const tableElement = document.createElement('div');
+        tableElement.className = 'col-lg-3 col-md-4 col-sm-6 mb-4 table-item';
+        tableElement.dataset.tableId = table.table_id;
+        tableElement.dataset.tableNumber = table.table_number;
+        
+        // Random status for demo (thực tế lấy từ API)
+        const statusClasses = ['table-available', 'table-occupied', 'table-reserved'];
+        const statusBadges = [
+            '<span class="badge bg-success">Available</span>',
+            '<span class="badge bg-danger">Occupied</span>',
+            '<span class="badge bg-warning">Reserved</span>'
+        ];
+        const randomIndex = Math.floor(Math.random() * 3);
+        
+        tableElement.innerHTML = `
+            <div class="card table-card ${statusClasses[randomIndex]} shadow-sm">
+                <div class="table-capacity">
+                    <i class="bi bi-person"></i> Capacity: ${table.capacity}
+                </div>
+                <div class="table-status">
+                    ${statusBadges[randomIndex]}
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <div class="text-center">
+                        <div class="table-number">${table.table_number}</div>
+                    </div>
+                </div>
+                <div class="table-info">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <button class="btn btn-sm btn-outline-primary new-order-btn" data-bs-toggle="modal" data-bs-target="#newOrderModal" data-table-id="${table.table_id}">
+                                <i class="bi bi-plus"></i> New Order
+                            </button>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item edit-table-btn" href="#" data-bs-toggle="modal" data-bs-target="#editTableModal" data-table-id="${table.table_id}">Edit</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger delete-table-btn" href="#" data-bs-toggle="modal" data-bs-target="#deleteTableModal" data-table-id="${table.table_id}">Delete</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        tablesContainer.appendChild(tableElement);
+    });
+    
+    // Thêm event listeners cho các button
+    addTableEventListeners();
+}
+
+function addTableEventListeners() {
+    // Event listener cho Edit button
+    document.querySelectorAll('.edit-table-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tableId = this.dataset.tableId;
+            editTable(tableId);
+        });
+    });
+    
+    // Event listener cho Delete button
+    document.querySelectorAll('.delete-table-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tableId = this.dataset.tableId;
+            document.getElementById('deleteTableId').value = tableId;
+        });
+    });
+    
+    // Event listener cho New Order button
+    document.querySelectorAll('.new-order-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tableId = this.dataset.tableId;
+            document.getElementById('orderTableId').value = tableId;
+        });
+    });
+}
+
+// Function edit table
+function editTable(tableId) {
+    fetch(`/api/v1/tables/${tableId}`, {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to get table details');
+        }
+        return response.json();
+    })
+    .then(table => {
+        document.getElementById('editTableId').value = table.table_id;
+        document.getElementById('editTableNumber').value = table.table_number;
+        document.getElementById('editTableCapacity').value = table.capacity;
+    })
+    .catch(error => {
+        console.error('Error loading table details:', error);
+        alert('Error: ' + error.message);
+    });
+}
+
+// Gọi function loadTables khi page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Kiểm tra nếu đang ở trang tables
+    if (window.location.pathname === '/tables') {
+        loadTables();
+    }
+});

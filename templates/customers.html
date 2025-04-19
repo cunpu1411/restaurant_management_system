@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Management - Restaurant Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Customer Management</h1>
+        <div class="btn-toolbar">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCustomerModal">
+                <i class="bi bi-plus-circle"></i> Add Customer
+            </button>
+        </div>
+    </div>
+
+    <!-- Search -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control" id="searchCustomers" placeholder="Search customers...">
+                <button class="btn btn-outline-primary" type="button" id="searchBtn">Search</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer List -->
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Contact Number</th>
+                            <th>Orders</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customersTableBody">
+                        <!-- Data will be loaded dynamically -->
+                        <tr>
+                            <td colspan="5" class="text-center">Loading customers...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Customer Modal -->
+<div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addCustomerModalLabel">Add New Customer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addCustomerForm">
+                    <div class="mb-3">
+                        <label for="customerName" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="customerName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="contactNumber" class="form-label">Contact Number</label>
+                        <input type="tel" class="form-control" id="contactNumber">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveCustomerBtn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load customers from API
+    loadCustomers();
+    
+    // Add customer form submission
+    document.getElementById('saveCustomerBtn').addEventListener('click', function() {
+        const form = document.getElementById('addCustomerForm');
+        if (!form.checkValidity()) {
+            form.classList.add('was-validated');
+            return;
+        }
+        
+        const name = document.getElementById('customerName').value;
+        const contactNumber = document.getElementById('contactNumber').value;
+        
+        createCustomer(name, contactNumber);
+    });
+    
+    // Search functionality
+    document.getElementById('searchBtn').addEventListener('click', function() {
+        const searchTerm = document.getElementById('searchCustomers').value;
+        searchCustomers(searchTerm);
+    });
+});
+
+function getAuthToken() {
+    return localStorage.getItem('auth_token');
+}
+
+function loadCustomers() {
+    fetch('/api/v1/customers/', {
+        headers: {
+            'Authorization': `Bearer ${getAuthToken()}`
+        },
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to load customers');
+        }
+        return response.json();
+    })
+    .then(customers => {
+        renderCustomers(customers);
+    })
+    .catch(error => {
+        console.error('Error loading customers:', error);
+        document.getElementById('customersTableBody').innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-danger">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    Error loading customers: ${error.message}
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function renderCustomers(customers) {
+    const tableBody = document.getElementById('customersTableBody');
+    tableBody.innerHTML = '';
+    
+    if (customers.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center">No customers found</td>
+            </tr>
+        `;
+        return;
+    }
+    
+    customers.forEach(customer => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${customer.customer_id}</td>
+            <td>${customer.name || 'N/A'}</td>
+            <td>${customer.contact_number || 'N/A'}</td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary view-orders-btn" data-customer-id="${customer.customer_id}">
+                    View Orders
+                </button>
+            </td>
+            <td>
+                <button class="btn btn-sm btn-outline-secondary edit-customer-btn" data-customer-id="${customer.customer_id}">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger delete-customer-btn" data-customer-id="${customer.customer_id}">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+function createCustomer(name, contactNumber) {
+    const customerData = {
+        name: name,
+        contact_number: contactNumber
+    };
+    
+    fetch('/api/v1/customers/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getAuthToken()}`
+        },
+        body: JSON.stringify(customerData),
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to create customer');
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addCustomerModal'));
+        modal.hide();
+        
+        // Reset form
+        document.getElementById('addCustomerForm').reset();
+        
+        // Reload customers
+        loadCustomers();
+        
+        // Show success message
+        alert('Customer added successfully!');
+    })
+    .catch(error => {
+        console.error('Error creating customer:', error);
+        alert('Error adding customer: ' + error.message);
+    });
+}
+
+function searchCustomers(searchTerm) {
+    // In a real application, this would filter through the API
+    // For demo, we'll just filter the table rows
+    const rows = document.querySelectorAll('#customersTableBody tr');
+    
+    rows.forEach(row => {
+        const rowText = row.textContent.toLowerCase();
+        if (rowText.includes(searchTerm.toLowerCase())) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+</script>
+{% endblock %}

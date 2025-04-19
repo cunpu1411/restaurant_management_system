@@ -362,6 +362,25 @@ async def create_customer_order(
             content={"detail": f"Lỗi khi tạo đơn hàng: {str(e)}"}
         )
 
+#Thêm route cho staff pagepage
+@app.get("/staff")
+async def staff(request: Request, db: Session = Depends(get_db)):
+    try:
+        # Lấy thông tin user từ token
+        user_id = request.state.user_id if hasattr(request.state, "user_id") else None
+        print(f"Staff page accessed by user_id: {user_id}")
+        
+        return templates.TemplateResponse("staff.html", {
+            "request": request,
+            "user_id": user_id
+        })
+    except Exception as e:
+        print(f"Error in staff: {str(e)}")
+        return templates.TemplateResponse("error.html", {
+            "request": request,
+            "error": str(e)
+        })
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True, debug=True)

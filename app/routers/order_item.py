@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -19,7 +19,7 @@ def read_order_items_by_order(
     skip: int = 0, 
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Retrieve order items by order.
@@ -42,7 +42,7 @@ def create_order_item(
     *,
     db: Session = Depends(get_db),
     order_item_in: OrderItemCreate,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Add item to an order.
@@ -74,7 +74,7 @@ def read_order_item(
     *,
     db: Session = Depends(get_db),
     order_item_id: int,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Get order item by ID.
@@ -93,7 +93,7 @@ def update_order_item(
     db: Session = Depends(get_db),
     order_item_id: int,
     order_item_in: OrderItemUpdate,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Update an order item.
@@ -126,7 +126,7 @@ def delete_order_item(
     *,
     db: Session = Depends(get_db),
     order_item_id: int,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Delete an order item.
@@ -158,7 +158,7 @@ def update_order_item_status(
     db: Session = Depends(get_db),
     order_item_id: int,
     status: str,
-    current_user: Waitstaff = Depends(get_current_user)
+    current_user: Optional[Waitstaff] = Depends(get_current_user)
 ) -> Any:
     """
     Update the status of an order item.
