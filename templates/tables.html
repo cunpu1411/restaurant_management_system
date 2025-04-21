@@ -5,7 +5,8 @@
 {% block extra_css %}
 <style>
     .table-card {
-        height: 180px;
+        height: auto;
+        min-height: 180px;
         position: relative;
         transition: transform 0.3s;
     }
@@ -50,6 +51,14 @@
     .table-reserved {
         background-color: #fff8e1;
         border-color: #ffecb3;
+    }
+    .table-card .card-footer {
+        background-color: rgba(0,0,0,0.02);
+        padding: 0.75rem;
+        border-top: 1px solid rgba(0,0,0,0.05);
+    }
+    .edit-table-btn, .delete-table-btn {
+        font-size: 0.8rem;
     }
 </style>
 {% endblock %}
@@ -436,22 +445,67 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Edit table functionality
+    // Add this to the initializeMenuFunctions() or similar initialization function
     const updateTableBtn = document.getElementById('updateTableBtn');
-    if (updateTableBtn) {
-        updateTableBtn.addEventListener('click', function() {
-            const form = document.getElementById('editTableForm');
-            
-            if (!form.checkValidity()) {
-                form.classList.add('was-validated');
-                return;
+    if(updateTableBtn) {
+        updateTableBtn.addEventListener('click', updateTable);
+    }
+
+    // Implementation of the updateTable function
+    function updateTable() {
+        const tableId = document.getElementById('editTableId').value;
+        const tableNumber = document.getElementById('editTableNumber').value;
+        const capacity = parseInt(document.getElementById('editTableCapacity').value);
+        const status = document.querySelector('input[name="editTableStatus"]:checked').value;
+        // Basic validation
+        if (!tableNumber || capacity < 1) {
+            alert('Please fill all required fields. Capacity must be at least 1.');
+            return;
+        }
+        
+        const tableData = {
+            table_number: tableNumber,
+            capacity: capacity,
+            status: status      // Updating status from data
+        };
+        
+        // Get auth token from localStorage if available
+        const token = localStorage.getItem('auth_token');
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+        
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        // Send PUT request to update the table
+        fetch(`/api/v1/tables/${tableId}`, {
+            method: 'PUT',
+            headers: headers,
+            body: JSON.stringify(tableData),
+            credentials: 'include'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to update table');
             }
+            return response.json();
+        })
+        .then(data => {
+            // Close the modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editTableModal'));
+            modal.hide();
             
-            const tableId = document.getElementById('editTableId').value;
-            const tableNumber = document.getElementById('editTableNumber').value;
-            const capacity = document.getElementById('editTableCapacity').value;
-            const status = document.querySelector('input[name="editTableStatus"]:checked').value;
+            // Show success message
+            alert('Table updated successfully!');
             
-            updateTable(tableId, tableNumber, capacity, status);
+            // Reload tables to reflect changes
+            loadTables();
+        })
+        .catch(error => {
+            console.error('Error updating table:', error);
+            alert('Error updating table: ' + error.message);
         });
     }
     
@@ -836,19 +890,17 @@ function renderTables(tables) {
             tableElement.dataset.tableId = table.table_id;
             tableElement.dataset.tableNumber = table.table_number;
             
-            // Determine status class and badge
+            // Use the actual status from the database
             let statusClass = 'table-available';
             let statusBadge = '<span class="badge bg-success">Available</span>';
             let orderInfo = '';
             
-            // For demo purposes, we're using random statuses
-            // In a real app, this would come from the API
-            const randomStatus = Math.floor(Math.random() * 3);
-            if (randomStatus === 1) {
+            // Map the status to appropriate classes and badges
+            if (table.status === 'occupied') {
                 statusClass = 'table-occupied';
                 statusBadge = '<span class="badge bg-danger">Occupied</span>';
                 orderInfo = `<small class="text-muted">Order #${Math.floor(1000 + Math.random() * 9000)}</small>`;
-            } else if (randomStatus === 2) {
+            } else if (table.status === 'reserved') {
                 statusClass = 'table-reserved';
                 statusBadge = '<span class="badge bg-warning">Reserved</span>';
                 orderInfo = '<small class="text-muted">6:30 PM - John Doe</small>';
@@ -868,22 +920,22 @@ function renderTables(tables) {
                             ${orderInfo}
                         </div>
                     </div>
-                    <div class="table-info">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <button class="btn btn-sm btn-outline-primary new-order-btn" data-bs-toggle="modal" data-bs-target="#newOrderModal" data-table-id="${table.table_id}">
-                                    <i class="bi bi-plus"></i> New Order
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-6">
+                                <button class="btn btn-sm btn-outline-primary w-100 new-order-btn" data-bs-toggle="modal" data-bs-target="#newOrderModal" data-table-id="${table.table_id}">
+                                    <i class="bi bi-plus-circle"></i> New Order
                                 </button>
                             </div>
-                            <div class="dropdown">
-                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-three-dots-vertical"></i>
+                            <div class="col-3">
+                                <button class="btn btn-sm btn-outline-secondary w-100 edit-table-btn" data-bs-toggle="modal" data-bs-target="#editTableModal" data-table-id="${table.table_id}">
+                                    <i class="bi bi-pencil"></i> Edit
                                 </button>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item edit-table-btn" href="#" data-bs-toggle="modal" data-bs-target="#editTableModal" data-table-id="${table.table_id}">Edit</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item text-danger delete-table-btn" href="#" data-bs-toggle="modal" data-bs-target="#deleteTableModal" data-table-id="${table.table_id}">Delete</a></li>
-                                </ul>
+                            </div>
+                            <div class="col-3">
+                                <button class="btn btn-sm btn-outline-danger w-100 delete-table-btn" data-bs-toggle="modal" data-bs-target="#deleteTableModal" data-table-id="${table.table_id}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             </div>
                         </div>
                     </div>

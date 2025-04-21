@@ -9,6 +9,7 @@ class Table(Base):
     table_id = Column(Integer, primary_key=True, index=True)
     table_number = Column(String(20), unique=True, nullable=False)
     capacity = Column(Integer, nullable=False)
+    status = Column(String(20), default="available") 
     
     # Relationships
     orders = relationship("Order", back_populates="table")

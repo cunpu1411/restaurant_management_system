@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 class TableBase(BaseModel):
     table_number: str
     capacity: int = Field(..., ge=1)
+    status: Optional[str] = "available"
 
 # Properties to receive on table creation
 class TableCreate(TableBase):
