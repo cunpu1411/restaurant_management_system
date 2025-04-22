@@ -12,20 +12,20 @@ async def auth_middleware(request: Request, call_next):
     """
     # Danh sách các route không yêu cầu xác thực
     public_routes = [
-        '/login', 
-        '/admin-login', 
-        '/static', 
-        '/test', 
-        '/', 
-        '',
-        '/api/v1/auth/login',
-        '/api/v1/auth/login/json',
-        '/favicon.ico',
-        '/menu',
-        '/order',
-        '/tables',
-        '/api/v1/tables',
-        '/api/v1/tables/'
+    '/login', 
+    '/admin-login', 
+    '/static', 
+    '/test', 
+    '/', 
+    '',
+    '/api/v1/auth/login',
+    '/api/v1/auth/login/json',
+    '/favicon.ico',
+    '/menu',
+    '/order',
+    '/tables',
+    '/api/v1/tables',
+    '/api/v1/tables/'
     ]
     
     # Routes API công khai cho các thao tác GET
@@ -39,6 +39,16 @@ async def auth_middleware(request: Request, call_next):
         '/api/v1/waitstaff',
         '/api/v1/customers',
         '/api/v1/orders'
+    ]
+
+    # Routes that Waiters are allowed to access
+    waiter_allowed_routes = [
+        '/menu',
+        '/tables',
+        '/api/v1/menu-items',
+        '/api/v1/menu-items/',
+        '/api/v1/tables',
+        '/api/v1/tables/'
     ]
     
     # Routes that should be accessible after login
@@ -100,6 +110,33 @@ async def auth_middleware(request: Request, call_next):
             request.state.user_id = user_id
             
             print(f"Token validated for user_id: {user_id}")
+
+            # Check if the user is a Waiter and restrict access
+            db = SessionLocal()
+            try:
+                user = db.query(Waitstaff).filter(Waitstaff.staff_id == user_id).first()
+                
+                # If user is a Waiter, check if they're accessing allowed routes
+                if user and user.role == "Waiter":
+                    is_allowed = False
+                    
+                    # Check if the route is allowed for waiters
+                    for route in waiter_allowed_routes:
+                        if request.url.path.startswith(route):
+                            is_allowed = True
+                            break
+                    
+                    # If not allowed, return 403 Forbidden
+                    if not is_allowed:
+                        print(f"Waiter {user.username} attempted to access restricted route: {request.url.path}")
+                        return JSONResponse(
+                            status_code=status.HTTP_403_FORBIDDEN,
+                            content={"detail": "Not enough permissions to access this page"}
+                        )
+            except Exception as e:
+                print(f"Error checking waiter permissions: {str(e)}")
+            finally:
+                db.close()
             
             # Kiểm tra quyền hạn cho các API thay đổi dữ liệu menu
             if (request.url.path.startswith('/api/v1/menu-items') and 

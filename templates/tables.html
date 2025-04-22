@@ -283,6 +283,13 @@
                                 <!-- Waiters will be loaded dynamically -->
                             </select>
                             <div class="invalid-feedback">Please select a waiter.</div>
+                            <div id="waiterLoadError" class="text-danger small mt-1 d-none">
+                                Error loading waiters. Please try again.
+                            </div>
+                            <div id="waiterLoadingIndicator" class="text-muted small mt-1">
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                Loading waiters...
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label for="orderCustomer" class="form-label">Customer (Optional)</label>
@@ -571,10 +578,24 @@ function loadTables() {
 }
 
 function loadWaitstaff() {
-    fetch('/api/v1/waitstaff', {
-        headers: {
-            'Authorization': `Bearer ${getAuthToken()}`
-        },
+    // Hiển thị chỉ báo đang tải (nếu có)
+    const loadingIndicator = document.getElementById('waiterLoadingIndicator');
+    if (loadingIndicator) loadingIndicator.classList.remove('d-none');
+    
+    // Ẩn thông báo lỗi trước khi tải
+    const errorElement = document.getElementById('waiterLoadError');
+    if (errorElement) errorElement.classList.add('d-none');
+    
+    // Lấy token từ localStorage (nếu có)
+    const token = localStorage.getItem('auth_token');
+    const headers = {};
+    
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    fetch('/api/v1/waitstaff/', {
+        headers: headers,
         credentials: 'include'
     })
     .then(response => {
@@ -584,8 +605,22 @@ function loadWaitstaff() {
         return response.json();
     })
     .then(waitstaff => {
+        // Ẩn chỉ báo đang tải
+        if (loadingIndicator) loadingIndicator.classList.add('d-none');
+        
         const waiterSelect = document.getElementById('orderWaiter');
+        if (!waiterSelect) {
+            console.error('Waiter select element not found!');
+            return;
+        }
+        
         waiterSelect.innerHTML = '<option value="">Select a waiter</option>';
+        
+        // Kiểm tra nếu không có dữ liệu
+        if (!waitstaff || waitstaff.length === 0) {
+            waiterSelect.innerHTML += '<option value="" disabled>No waiters available</option>';
+            return;
+        }
         
         waitstaff.forEach(staff => {
             const option = document.createElement('option');
@@ -593,9 +628,110 @@ function loadWaitstaff() {
             option.textContent = staff.name;
             waiterSelect.appendChild(option);
         });
+        
+        // Thêm event listener để kiểm tra tính hợp lệ của form
+        waiterSelect.addEventListener('change', function() {
+            const errorMessage = waiterSelect.parentElement.querySelector('.invalid-feedback');
+            if (this.value) {
+                waiterSelect.classList.remove('is-invalid');
+                if (errorMessage) errorMessage.style.display = 'none';
+            }
+        });
     })
     .catch(error => {
         console.error('Error loading waitstaff:', error);
+        
+        // Ẩn chỉ báo đang tải
+        if (loadingIndicator) loadingIndicator.classList.add('d-none');
+        
+        // Hiển thị thông báo lỗi
+        if (errorElement) {
+            errorElement.textContent = `Error: ${error.message}`;
+            errorElement.classList.remove('d-none');
+        }
+        
+        const waiterSelect = document.getElementById('orderWaiter');
+        if (waiterSelect) {
+            waiterSelect.innerHTML = '<option value="">Error loading waiters</option>';
+        }
+    });
+}function loadWaitstaff() {
+    // Hiển thị chỉ báo đang tải (nếu có)
+    const loadingIndicator = document.getElementById('waiterLoadingIndicator');
+    if (loadingIndicator) loadingIndicator.classList.remove('d-none');
+    
+    // Ẩn thông báo lỗi trước khi tải
+    const errorElement = document.getElementById('waiterLoadError');
+    if (errorElement) errorElement.classList.add('d-none');
+    
+    // Lấy token từ localStorage (nếu có)
+    const token = localStorage.getItem('auth_token');
+    const headers = {};
+    
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    fetch('/api/v1/waitstaff/', {
+        headers: headers,
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to load waitstaff');
+        }
+        return response.json();
+    })
+    .then(waitstaff => {
+        // Ẩn chỉ báo đang tải
+        if (loadingIndicator) loadingIndicator.classList.add('d-none');
+        
+        const waiterSelect = document.getElementById('orderWaiter');
+        if (!waiterSelect) {
+            console.error('Waiter select element not found!');
+            return;
+        }
+        
+        waiterSelect.innerHTML = '<option value="">Select a waiter</option>';
+        
+        // Kiểm tra nếu không có dữ liệu
+        if (!waitstaff || waitstaff.length === 0) {
+            waiterSelect.innerHTML += '<option value="" disabled>No waiters available</option>';
+            return;
+        }
+        
+        waitstaff.forEach(staff => {
+            const option = document.createElement('option');
+            option.value = staff.staff_id;
+            option.textContent = staff.name;
+            waiterSelect.appendChild(option);
+        });
+        
+        // Thêm event listener để kiểm tra tính hợp lệ của form
+        waiterSelect.addEventListener('change', function() {
+            const errorMessage = waiterSelect.parentElement.querySelector('.invalid-feedback');
+            if (this.value) {
+                waiterSelect.classList.remove('is-invalid');
+                if (errorMessage) errorMessage.style.display = 'none';
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error loading waitstaff:', error);
+        
+        // Ẩn chỉ báo đang tải
+        if (loadingIndicator) loadingIndicator.classList.add('d-none');
+        
+        // Hiển thị thông báo lỗi
+        if (errorElement) {
+            errorElement.textContent = `Error: ${error.message}`;
+            errorElement.classList.remove('d-none');
+        }
+        
+        const waiterSelect = document.getElementById('orderWaiter');
+        if (waiterSelect) {
+            waiterSelect.innerHTML = '<option value="">Error loading waiters</option>';
+        }
     });
 }
 
@@ -636,24 +772,52 @@ function loadMenuItems() {
 }
 
 function addTable(tableNumber, capacity, status) {
+    console.log("Thực hiện thêm bàn:", { tableNumber, capacity, status });
+    
     const tableData = {
         table_number: tableNumber,
-        capacity: parseInt(capacity)
+        capacity: parseInt(capacity),
+        status: status // Thêm status vào dữ liệu gửi đi
     };
+    
+    // Đảm bảo lấy token đúng cách
+    const token = localStorage.getItem('auth_token');
+    console.log("Token available:", !!token);
+    
+    const headers = {
+        'Content-Type': 'application/json'
+    };
+    
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    console.log("Request headers:", headers);
     
     fetch('/api/v1/tables/', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getAuthToken()}`
-        },
+        headers: headers,
         body: JSON.stringify(tableData),
         credentials: 'include'
     })
     .then(response => {
+        console.log("Response status:", response.status);
+        
         if (!response.ok) {
-            throw new Error('Failed to add table');
+            if (response.status === 401) {
+                throw new Error('Bạn cần đăng nhập để thêm bàn mới');
+            } else if (response.status === 403) {
+                throw new Error('Bạn không có quyền thêm bàn mới');
+            }
+            
+            return response.json().then(data => {
+                throw new Error(data.detail || 'Lỗi khi thêm bàn');
+            }).catch(e => {
+                // Xử lý trường hợp phản hồi không phải JSON
+                throw new Error('Không thể thêm bàn: ' + response.status);
+            });
         }
+        
         return response.json();
     })
     .then(newTable => {
@@ -668,11 +832,11 @@ function addTable(tableNumber, capacity, status) {
         loadTables();
         
         // Show success message
-        alert('Table added successfully!');
+        alert('Thêm bàn thành công!');
     })
     .catch(error => {
         console.error('Error adding table:', error);
-        alert('Error adding table: ' + error.message);
+        alert('Lỗi khi thêm bàn: ' + error.message);
     });
 }
 
@@ -714,17 +878,28 @@ function updateTable(tableId, tableNumber, capacity, status) {
     });
 }
 
+// In tables.html or main.js
 function deleteTable(tableId) {
+    // Get auth token
+    const token = localStorage.getItem('auth_token');
+    
     fetch(`/api/v1/tables/${tableId}`, {
         method: 'DELETE',
         headers: {
-            'Authorization': `Bearer ${getAuthToken()}`
+            'Authorization': `Bearer ${token}`,  // Make sure to include the token
+            'Content-Type': 'application/json'
         },
-        credentials: 'include'
+        credentials: 'include'  // Include cookies
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error('Failed to delete table');
+            if (response.status === 401) {
+                throw new Error('You must be logged in to delete tables');
+            } else if (response.status === 403) {
+                throw new Error('You do not have permission to delete tables');
+            } else {
+                throw new Error('Failed to delete table');
+            }
         }
         return response.json();
     })
@@ -741,7 +916,7 @@ function deleteTable(tableId) {
     })
     .catch(error => {
         console.error('Error deleting table:', error);
-        alert('Error deleting table: ' + error.message);
+        alert(error.message);
     });
 }
 
@@ -753,14 +928,20 @@ function createOrder() {
     const waiterId = document.getElementById('orderWaiter').value;
     
     // Get or create customer
-    let customerId = document.getElementById('orderCustomer').value;
+    let customerId = document.getElementById('orderCustomer')?.value;
     let customerData = null;
     
-    if (!customerId && document.getElementById('customerName').value) {
+    // Kiểm tra phần khách hàng mới
+    const customerName = document.getElementById('customerName')?.value;
+    const customerPhone = document.getElementById('customerPhone')?.value;
+    
+    // Chuẩn bị dữ liệu khách hàng nếu có
+    if (customerName || customerPhone) {
         customerData = {
-            name: document.getElementById('customerName').value,
-            contact_number: document.getElementById('customerPhone').value
+            name: customerName || '',
+            contact_number: customerPhone || ''
         };
+        console.log("Customer data:", customerData);
     }
     
     // Get order items
@@ -772,15 +953,21 @@ function createOrder() {
         const quantityInput = itemElement.querySelector('.item-quantity');
         const specialRequestInput = itemElement.querySelector('.special-request');
         
-        if (menuItemSelect.value) {
+        if (menuItemSelect && menuItemSelect.value) {
             orderItems.push({
                 menu_item_id: parseInt(menuItemSelect.value),
-                quantity: parseInt(quantityInput.value),
-                special_request: specialRequestInput.value,
+                quantity: parseInt(quantityInput?.value || 1),
+                special_request: specialRequestInput?.value || '',
                 status: 'pending'
             });
         }
     });
+    
+    // Kiểm tra nếu không có món hàng nào
+    if (orderItems.length === 0) {
+        alert('Vui lòng chọn ít nhất một món');
+        return;
+    }
     
     // Create order data
     const orderData = {
@@ -790,81 +977,118 @@ function createOrder() {
         order_items: orderItems
     };
     
-    // Add customer ID if selected
+    // Add customer ID if selected from existing customers
     if (customerId) {
         orderData.customer_id = parseInt(customerId);
     }
     
-    // Create customer first if needed, then create order
-    let createOrderPromise;
+    // Lấy token để đảm bảo xác thực
+    const token = localStorage.getItem('auth_token');
+    const headers = {
+        'Content-Type': 'application/json'
+    };
     
-    if (customerData) {
-        createOrderPromise = fetch('/api/v1/customers/get-or-create', {
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    console.log("Order data:", orderData);
+    console.log("Auth token available:", !!token);
+    
+    // Nếu không có thông tin khách hàng mới hoặc đã chọn khách hàng có sẵn, tạo đơn hàng trực tiếp
+    if (!customerData || customerId) {
+        fetch('/api/v1/orders/', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${getAuthToken()}`
-            },
+            headers: headers,
+            body: JSON.stringify(orderData),
+            credentials: 'include'
+        })
+        .then(handleResponse)
+        .then(handleOrderSuccess)
+        .catch(handleError);
+    } else {
+        // Nếu cần tạo khách hàng mới, xử lý khách hàng trước
+        fetch('/api/v1/customers/get-or-create', {
+            method: 'POST',
+            headers: headers,
             body: JSON.stringify(customerData),
             credentials: 'include'
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Failed to create customer');
+                if (response.status === 401) {
+                    throw new Error("Bạn cần đăng nhập để tạo khách hàng mới");
+                }
+                return response.json().then(err => {
+                    throw new Error(err.detail || "Không thể tạo khách hàng mới");
+                }).catch(() => {
+                    throw new Error(`Lỗi ${response.status} khi tạo khách hàng`);
+                });
             }
             return response.json();
         })
         .then(customer => {
+            console.log("Customer created:", customer);
+            // Thêm customer_id vào orderData
             orderData.customer_id = customer.customer_id;
             
+            // Gửi request tạo đơn hàng
             return fetch('/api/v1/orders/', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${getAuthToken()}`
-                },
+                headers: headers,
                 body: JSON.stringify(orderData),
                 credentials: 'include'
             });
-        });
-    } else {
-        createOrderPromise = fetch('/api/v1/orders/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${getAuthToken()}`
-            },
-            body: JSON.stringify(orderData),
-            credentials: 'include'
-        });
+        })
+        .then(handleResponse)
+        .then(handleOrderSuccess)
+        .catch(handleError);
     }
     
-    createOrderPromise
-    .then(response => {
+    // Hàm xử lý response
+    function handleResponse(response) {
         if (!response.ok) {
-            throw new Error('Failed to create order');
+            if (response.status === 401) {
+                throw new Error("Bạn cần đăng nhập để tạo đơn hàng");
+            }
+            return response.json().then(err => {
+                throw new Error(err.detail || "Không thể tạo đơn hàng");
+            }).catch(e => {
+                if (e.message && e.message !== "Unexpected end of JSON input") {
+                    throw e;
+                }
+                throw new Error(`Lỗi ${response.status} khi tạo đơn hàng`);
+            });
         }
         return response.json();
-    })
-    .then(newOrder => {
-        // Close modal
+    }
+    
+    // Hàm xử lý thành công
+    function handleOrderSuccess(newOrder) {
+        console.log("Order created successfully:", newOrder);
+        
+        // Đóng modal
         const modal = bootstrap.Modal.getInstance(document.getElementById('newOrderModal'));
-        modal.hide();
+        if (modal) modal.hide();
         
         // Reset form
         document.getElementById('newOrderForm').reset();
         
-        // Reload tables
+        // Tải lại danh sách bàn
         loadTables();
         
-        // Show success message and redirect to orders page
-        alert('Order created successfully!');
-        window.location.href = `/orders/${newOrder.order_id}`;
-    })
-    .catch(error => {
+        // Hiển thị thông báo thành công
+        alert('Đơn hàng đã được tạo thành công!');
+        
+        // Nếu muốn chuyển hướng đến trang đơn hàng
+        // window.location.href = `/orders/${newOrder.order_id}`;
+    }
+    
+    // Hàm xử lý lỗi
+    function handleError(error) {
         console.error('Error creating order:', error);
-        alert('Error creating order: ' + error.message);
-    });
+        alert('Lỗi khi tạo đơn hàng: ' + error.message);
+    }
 }
 
 // Helper functions
@@ -975,6 +1199,16 @@ function renderTables(tables) {
                 const tableId = this.dataset.tableId;
                 document.getElementById('orderTableId').value = tableId;
                 document.getElementById('newOrderModalLabel').textContent = `Create New Order - Table ${getTableNumberById(tableId)}`;
+                
+                // Gọi hàm loadWaitstaff để tải danh sách nhân viên phục vụ
+                loadWaitstaff();
+
+                // Tải thêm dữ liệu menu items nếu cần
+                loadMenuItems();
+                
+                // Đồng thời cũng nên tải dữ liệu cho các dropdown khác nếu cần
+                // Ví dụ: loadCustomers();
+                // Và loadMenuItems() nếu cần
             });
         });
         
@@ -1153,5 +1387,22 @@ function renderTables(tables) {
         
         document.getElementById('orderTotal').textContent = '$' + total.toFixed(2);
     }
+
+    // Debug function to check JWT token
+    function checkAuthToken() {
+        const token = localStorage.getItem('auth_token');
+        if (!token) {
+            console.log("No token found in localStorage");
+            return "No token";
+        }
+        
+        // Hiển thị phần đầu của token để debug (không hiển thị toàn bộ token vì lý do bảo mật)
+        return token.substring(0, 15) + "...";
+    }
+
+    // Thêm event listener để debug token khi cần
+    document.getElementById('saveTableBtn').addEventListener('click', function() {
+        console.log("Auth token check:", checkAuthToken());
+    });
 </script>
 {% endblock %}

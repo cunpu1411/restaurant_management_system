@@ -111,18 +111,19 @@ def update_table(
     
     return table_controller.update_table(db, table_id=table_id, table=table_in)
 
+# In the delete_table function, change the Optional[Waitstaff] to require authentication
 @router.delete("/{table_id}", response_model=Table)
 def delete_table(
     *,
     db: Session = Depends(get_db),
     table_id: int,
-    current_user: Optional[Waitstaff] = Depends(get_current_user)
+    current_user: Waitstaff = Depends(get_current_user)  # Remove Optional[]
 ) -> Any:
     """
     Delete a table.
     """
-    # Check permission if current_user exists
-    if current_user and current_user.role != "Manager":
+    # Only managers can delete tables
+    if current_user.role != "Manager":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions"

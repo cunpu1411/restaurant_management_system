@@ -22,7 +22,7 @@ def read_waitstaff(
     Retrieve waitstaff.
     """
     # Only managers can view all waitstaff
-    if current_user.role != "Manager":
+    if current_user and current_user.role not in ["Manager", "Waiter"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions"
